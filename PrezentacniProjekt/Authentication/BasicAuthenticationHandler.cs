@@ -17,11 +17,11 @@ namespace PrezentacniProjekt
         {
         }
 
-        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             if (!Request.Headers.ContainsKey("Authorization"))
             {
-                return AuthenticateResult.Fail("Missing Authorization Header");
+                return Task.FromResult(AuthenticateResult.Fail("Missing Authorization Header"));
             }
 
             try
@@ -43,14 +43,14 @@ namespace PrezentacniProjekt
                     var principal = new ClaimsPrincipal(identity);
                     var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
-                    return AuthenticateResult.Success(ticket);
+                    return Task.FromResult(AuthenticateResult.Success(ticket));
                 }
 
-                return AuthenticateResult.Fail("Invalid Username or Password");
+                return Task.FromResult(AuthenticateResult.Fail("Invalid Username or Password"));
             }
             catch
             {
-                return AuthenticateResult.Fail("Invalid Authorization Header");
+                return Task.FromResult(AuthenticateResult.Fail("Invalid Authorization Header"));
             }
         }
 

@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36310.24 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrezentacniProjekt", "PrezentacniProjekt\PrezentacniProjekt.csproj", "{9A4EDCC8-A36F-479D-8056-11067C5290D5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrezentacniProjekt.RestApi", "PrezentacniProjekt\PrezentacniProjekt.RestApi.csproj", "{9A4EDCC8-A36F-479D-8056-11067C5290D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrezentacniProjekt.Shared.Model", "PrezentacniProjekt.Shared\PrezentacniProjekt.Shared.Model.csproj", "{177A4015-018C-4FC5-8833-DB04F449DC5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{9A4EDCC8-A36F-479D-8056-11067C5290D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A4EDCC8-A36F-479D-8056-11067C5290D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A4EDCC8-A36F-479D-8056-11067C5290D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{177A4015-018C-4FC5-8833-DB04F449DC5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{177A4015-018C-4FC5-8833-DB04F449DC5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{177A4015-018C-4FC5-8833-DB04F449DC5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{177A4015-018C-4FC5-8833-DB04F449DC5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

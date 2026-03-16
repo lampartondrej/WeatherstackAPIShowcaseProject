@@ -34,6 +34,8 @@ namespace PrezentacniProjekt
 
                 //register services
                 builder.Services.AddHttpClient();
+                builder.Services.AddHealthChecks();
+                builder.Services.AddScoped<Services.Interfaces.IWeatherService, Services.WeatherService>();
 
                 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
                 builder.Services.AddEndpointsApiExplorer();
@@ -81,6 +83,8 @@ namespace PrezentacniProjekt
                 app.UseAuthorization();
 
                 app.MapControllers();
+
+                app.MapHealthChecks("/health");
 
                 app.Run();
             }
