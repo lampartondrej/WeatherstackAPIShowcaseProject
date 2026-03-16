@@ -8,6 +8,9 @@ using PrezentacniProjekt.Shared.Model.DTOs.Weatherstack.Forecast.Response;
 
 namespace PrezentacniProjekt.Services
 {
+    /// <summary>
+    /// Service implementation for retrieving weather information from the Weatherstack API.
+    /// </summary>
     public class WeatherService : IPrezentacniProjectBaseService, IWeatherService
     {
         private readonly ILogger<IPrezentacniProjectBaseService> _logger;
@@ -18,6 +21,14 @@ namespace PrezentacniProjekt.Services
         private readonly string WeatherApiBaseUrl;
         private readonly string CurrentWeatherEndpoint;
         private readonly string ForecastWeatherEndpoint;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WeatherService"/> class.
+        /// </summary>
+        /// <param name="logger">The logger instance for logging service operations.</param>
+        /// <param name="configuration">The configuration instance for accessing application settings.</param>
+        /// <param name="httpClientFactory">The HTTP client factory for creating HTTP client instances.</param>
+        /// <exception cref="InvalidOperationException">Thrown when required configuration values are missing.</exception>
         public WeatherService(ILogger<IPrezentacniProjectBaseService> logger,
             IConfiguration configuration,
             IHttpClientFactory httpClientFactory) : base(logger, configuration, httpClientFactory)
@@ -33,17 +44,38 @@ namespace PrezentacniProjekt.Services
 
         }
         #region public methods
+        /// <summary>
+        /// Gets the current weather for a specified location.
+        /// </summary>
+        /// <param name="currentWeatherRequest">The request containing location and query parameters.</param>
+        /// <returns>
+        /// A tuple containing either the current weather response or a detailed error message if the request fails.
+        /// </returns>
         public async Task<(CurrentWeatherResponse?, DetailedErrorMessage?)> GetCurrentWeather(GetCurrentWeatherRequest currentWeatherRequest)
         {
             return await GetCurrentWeatherAsync(currentWeatherRequest);
         }
 
+        /// <summary>
+        /// Gets the forecast weather for a specified location.
+        /// </summary>
+        /// <param name="forecastWeatherRequest">The request containing location, forecast days, and other query parameters.</param>
+        /// <returns>
+        /// A tuple containing either the forecast weather response or a detailed error message if the request fails.
+        /// </returns>
         public async Task<(ForecastWeatherResponse?, DetailedErrorMessage?)> GetForecastWeather(GetForecastWeatherRequest forecastWeatherRequest)
         {
             return await GetForecastWeatherAsync(forecastWeatherRequest);
         }
         #endregion
         #region private methods
+        /// <summary>
+        /// Asynchronously retrieves current weather data from the Weatherstack API.
+        /// </summary>
+        /// <param name="currentWeatherRequest">The request containing location and query parameters.</param>
+        /// <returns>
+        /// A tuple containing either the current weather response or a detailed error message if the request fails.
+        /// </returns>
         private async Task<(CurrentWeatherResponse?, DetailedErrorMessage?)> GetCurrentWeatherAsync(GetCurrentWeatherRequest currentWeatherRequest)
         {
             try
@@ -81,12 +113,19 @@ namespace PrezentacniProjekt.Services
                 {
                     Message = "An error occurred while fetching current weather data.",
                     Details = ex.Message,
-                    HttpStatusCode = 999
+                    HttpStatusCode = 500
                 };
                 return (null, errorMessage);
             }
         }
 
+        /// <summary>
+        /// Asynchronously retrieves forecast weather data from the Weatherstack API.
+        /// </summary>
+        /// <param name="forecastWeatherRequest">The request containing location, forecast days, and other query parameters.</param>
+        /// <returns>
+        /// A tuple containing either the forecast weather response or a detailed error message if the request fails.
+        /// </returns>
         private async Task<(ForecastWeatherResponse?, DetailedErrorMessage?)> GetForecastWeatherAsync(GetForecastWeatherRequest forecastWeatherRequest)
         {
             try
@@ -123,7 +162,7 @@ namespace PrezentacniProjekt.Services
                 {
                     Message = "An error occurred while fetching forecast weather data.",
                     Details = ex.Message,
-                    HttpStatusCode = 999
+                    HttpStatusCode = 500
                 };
                 return (null, errorMessage);
             }

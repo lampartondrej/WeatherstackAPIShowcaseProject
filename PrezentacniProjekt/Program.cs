@@ -3,8 +3,15 @@ using Serilog;
 
 namespace PrezentacniProjekt
 {
+    /// <summary>
+    /// The main entry point for the application.
+    /// </summary>
     public class Program
     {
+        /// <summary>
+        /// The main method that configures and runs the web application.
+        /// </summary>
+        /// <param name="args">Command-line arguments passed to the application.</param>
         public static void Main(string[] args)
         {
             // Configure Serilog early in the application startup

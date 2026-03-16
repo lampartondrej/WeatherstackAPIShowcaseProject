@@ -8,10 +8,20 @@ using PrezentacniProjekt.Shared.Model.DTOs.Weatherstack.Forecast.Request;
 
 namespace PrezentacniProjekt.RestApi.Controllers
 {
+    /// <summary>
+    /// Controller for managing weather-related operations.
+    /// Provides endpoints for retrieving current weather and weather forecasts.
+    /// </summary>
     public class WeatherController : PrezentacniProjektBaseController
     {
         private readonly ILogger<PrezentacniProjektBaseController> _logger;
         private readonly IWeatherService _weatherService;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WeatherController"/> class.
+        /// </summary>
+        /// <param name="logger">The logger instance for logging operations.</param>
+        /// <param name="weatherService">The weather service for retrieving weather data.</param>
         public WeatherController(ILogger<PrezentacniProjektBaseController> logger,
             IWeatherService weatherService) : base(logger)
         {
@@ -19,6 +29,14 @@ namespace PrezentacniProjekt.RestApi.Controllers
             _weatherService = weatherService;
         }
 
+        /// <summary>
+        /// Retrieves current weather information for a specified location.
+        /// </summary>
+        /// <param name="currentWeatherRequest">The request containing location and query parameters.</param>
+        /// <returns>Current weather data or error information.</returns>
+        /// <response code="200">Returns the current weather data.</response>
+        /// <response code="400">Returns error details if the request is invalid.</response>
+        /// <response code="500">Returns error details if an internal server error occurs.</response>
         [HttpPost]
         [Route("current")]
         [ProducesResponseType(typeof(CurrentWeatherResponse), StatusCodes.Status200OK)]
@@ -74,6 +92,14 @@ namespace PrezentacniProjekt.RestApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves weather forecast information for a specified location.
+        /// </summary>
+        /// <param name="getForecastWeatherRequest">The request containing location and forecast parameters.</param>
+        /// <returns>Weather forecast data or error information.</returns>
+        /// <response code="200">Returns the weather forecast data.</response>
+        /// <response code="400">Returns error details if the request is invalid.</response>
+        /// <response code="500">Returns error details if an internal server error occurs.</response>
         [HttpPost]
         [Route("forecast")]
         [ProducesResponseType(typeof(CurrentWeatherResponse), StatusCodes.Status200OK)]
