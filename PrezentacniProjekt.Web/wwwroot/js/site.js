@@ -22,22 +22,29 @@ setInterval(setTimeBasedBackground, 60000);
 
 // Tab navigation functionality
 document.querySelectorAll('.nav-tab').forEach(tab => {
-    tab.addEventListener('click', function(e) {
+    tab.addEventListener('click', function (e) {
         e.preventDefault();
-        
+
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         this.classList.add('active');
-        
+
         const tabName = this.dataset.tab;
         const currentView = document.getElementById('current-weather-view');
         const forecastView = document.getElementById('forecast-weather-view');
-        
+        const savedLocation = localStorage.getItem('weatherLocation');
+
         if (tabName === 'current') {
             if (currentView) currentView.classList.add('active');
             if (forecastView) forecastView.classList.remove('active');
+            if (savedLocation) {
+                fetchCurrentWeather(savedLocation);
+            }
         } else if (tabName === 'forecast') {
             if (currentView) currentView.classList.remove('active');
             if (forecastView) forecastView.classList.add('active');
+            if (savedLocation) {
+                fetchForecastWeather(savedLocation);
+            }
         }
     });
 });
@@ -182,11 +189,11 @@ function setElementText(id, text) {
 async function loadWeatherData(location) {
     console.log('Loading weather data for:', location);
     setElementText('current-description', 'Loading...');
-    setElementText('forecast-description', 'Loading...');
+    //setElementText('forecast-description', 'Loading...');
     
     await Promise.all([
         fetchCurrentWeather(location),
-        fetchForecastWeather(location)
+        //fetchForecastWeather(location)
     ]);
 }
 
