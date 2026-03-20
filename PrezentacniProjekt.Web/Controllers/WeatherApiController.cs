@@ -95,8 +95,7 @@ namespace PrezentacniProjekt.Web.Controllers
 
                 var request = new GetForecastWeatherRequest 
                 { 
-                    Location = location,
-                    forecastDays = 5
+                    Location = location
                 };
                 var content = new StringContent(
                     JsonSerializer.Serialize(request),
