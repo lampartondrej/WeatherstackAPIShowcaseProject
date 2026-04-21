@@ -66,8 +66,9 @@ The system is designed to separate concerns between presentation, business logic
 ### Forecast view
 
 ![Forecast](./docs/screenshots/forecast.png)
+
 Note: Weatherstack API does not provide weather forcast on their open api model and it is paid function.
-For this showcase project is weather forecast disabled and only simulated.
+For this showcase project weather forecast is disabled and only simulated.
 
 ### Swagger API
 
