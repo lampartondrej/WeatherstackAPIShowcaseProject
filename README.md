@@ -193,7 +193,7 @@ Authorization: Basic base64(username:password)
 * Basic API security concepts
 
 ---
-
+   
 ## 👨‍💻 Author
 
 Ondřej Lampart
