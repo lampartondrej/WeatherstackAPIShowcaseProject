@@ -1,0 +1,246 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!-- Current Weather View -->
+<div id="current-weather-view" class="glass-panel weather-view active">
+    <div class="weather-layout">
+        <!-- Left Side - Weather Details -->
+        <div class="weather-details-left">
+            <div class="detail-item">
+                <span class="detail-icon">💨</span>
+                <div class="detail-info">
+                    <span class="detail-label">Wind Speed</span>
+                    <span class="detail-value" id="current-wind-speed">-- km/h</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">💧</span>
+                <div class="detail-info">
+                    <span class="detail-label">Humidity</span>
+                    <span class="detail-value" id="current-humidity">--%</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">🌡️</span>
+                <div class="detail-info">
+                    <span class="detail-label">Feels Like</span>
+                    <span class="detail-value" id="current-feelslike">--°C</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">📊</span>
+                <div class="detail-info">
+                    <span class="detail-label">Pressure</span>
+                    <span class="detail-value" id="current-pressure">-- mb</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">👁️</span>
+                <div class="detail-info">
+                    <span class="detail-label">Visibility</span>
+                    <span class="detail-value" id="current-visibility">-- km</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">☁️</span>
+                <div class="detail-info">
+                    <span class="detail-label">Cloud Cover</span>
+                    <span class="detail-value" id="current-cloudcover">--%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center - Main Weather Display -->
+        <div class="weather-main">
+            <div class="weather-icon-container">
+                <div id="current-weather-icon" class="weather-icon-large">🌤️</div>
+            </div>
+            <div class="weather-temp" id="current-temperature">--°C</div>
+            <div class="weather-description" id="current-description">Loading...</div>
+            <div class="weather-location" id="current-location-name">--</div>
+        </div>
+
+        <!-- Right Side - Astro Details -->
+        <div class="weather-details-right">
+            <div class="detail-item">
+                <span class="detail-icon">🌅</span>
+                <div class="detail-info">
+                    <span class="detail-label">Sunrise</span>
+                    <span class="detail-value" id="current-sunrise">--:--</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">🌇</span>
+                <div class="detail-info">
+                    <span class="detail-label">Sunset</span>
+                    <span class="detail-value" id="current-sunset">--:--</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">🌙</span>
+                <div class="detail-info">
+                    <span class="detail-label">Moonrise</span>
+                    <span class="detail-value" id="current-moonrise">--:--</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">🌑</span>
+                <div class="detail-info">
+                    <span class="detail-label">Moonset</span>
+                    <span class="detail-value" id="current-moonset">--:--</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">🌓</span>
+                <div class="detail-info">
+                    <span class="detail-label">Moon Phase</span>
+                    <span class="detail-value" id="current-moon-phase">--</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">✨</span>
+                <div class="detail-info">
+                    <span class="detail-label">Moon Illumination</span>
+                    <span class="detail-value" id="current-moon-illumination">--%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Forecast Weather View -->
+<div id="forecast-weather-view" class="glass-panel weather-view">
+    <div class="weather-layout">
+        <!-- Left Side - Weather Details -->
+        <div class="weather-details-left">
+            <div class="detail-item">
+                <span class="detail-icon">💨</span>
+                <div class="detail-info">
+                    <span class="detail-label">Wind Speed</span>
+                    <span class="detail-value" id="forecast-wind-speed">-- km/h</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">💧</span>
+                <div class="detail-info">
+                    <span class="detail-label">Humidity</span>
+                    <span class="detail-value" id="forecast-humidity">--%</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">🌡️</span>
+                <div class="detail-info">
+                    <span class="detail-label">Feels Like</span>
+                    <span class="detail-value" id="forecast-feelslike">--°C</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">📊</span>
+                <div class="detail-info">
+                    <span class="detail-label">Pressure</span>
+                    <span class="detail-value" id="forecast-pressure">-- mb</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">👁️</span>
+                <div class="detail-info">
+                    <span class="detail-label">Visibility</span>
+                    <span class="detail-value" id="forecast-visibility">-- km</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">☁️</span>
+                <div class="detail-info">
+                    <span class="detail-label">Cloud Cover</span>
+                    <span class="detail-value" id="forecast-cloudcover">--%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center - Main Weather Display -->
+        <div class="weather-main">
+            <div class="weather-icon-container">
+                <div id="forecast-weather-icon" class="weather-icon-large">🌤️</div>
+            </div>
+            <div class="weather-temp" id="forecast-temperature">--°C</div>
+            <div class="weather-description" id="forecast-description">Loading...</div>
+            <div class="weather-location" id="forecast-location-name">--</div>
+
+            <!-- Forecast Days Row -->
+            <div class="forecast-days">
+                <div class="forecast-day">
+                    <span class="forecast-day-name" id="forecast-day-1-name">--</span>
+                    <div class="forecast-day-icon" id="forecast-day-1-icon">🌤️</div>
+                    <span class="forecast-day-temp" id="forecast-day-1-temp">--°</span>
+                </div>
+                <div class="forecast-day">
+                    <span class="forecast-day-name" id="forecast-day-2-name">--</span>
+                    <div class="forecast-day-icon" id="forecast-day-2-icon">🌤️</div>
+                    <span class="forecast-day-temp" id="forecast-day-2-temp">--°</span>
+                </div>
+                <div class="forecast-day">
+                    <span class="forecast-day-name" id="forecast-day-3-name">--</span>
+                    <div class="forecast-day-icon" id="forecast-day-3-icon">🌤️</div>
+                    <span class="forecast-day-temp" id="forecast-day-3-temp">--°</span>
+                </div>
+                <div class="forecast-day">
+                    <span class="forecast-day-name" id="forecast-day-4-name">--</span>
+                    <div class="forecast-day-icon" id="forecast-day-4-icon">🌤️</div>
+                    <span class="forecast-day-temp" id="forecast-day-4-temp">--°</span>
+                </div>
+                <div class="forecast-day">
+                    <span class="forecast-day-name" id="forecast-day-5-name">--</span>
+                    <div class="forecast-day-icon" id="forecast-day-5-icon">🌤️</div>
+                    <span class="forecast-day-temp" id="forecast-day-5-temp">--°</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Astro Details -->
+        <div class="weather-details-right">
+            <div class="detail-item">
+                <span class="detail-icon">🌅</span>
+                <div class="detail-info">
+                    <span class="detail-label">Sunrise</span>
+                    <span class="detail-value" id="forecast-sunrise">--:--</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">🌇</span>
+                <div class="detail-info">
+                    <span class="detail-label">Sunset</span>
+                    <span class="detail-value" id="forecast-sunset">--:--</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">🌙</span>
+                <div class="detail-info">
+                    <span class="detail-label">Moonrise</span>
+                    <span class="detail-value" id="forecast-moonrise">--:--</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">🌑</span>
+                <div class="detail-info">
+                    <span class="detail-label">Moonset</span>
+                    <span class="detail-value" id="forecast-moonset">--:--</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">🌓</span>
+                <div class="detail-info">
+                    <span class="detail-label">Moon Phase</span>
+                    <span class="detail-value" id="forecast-moon-phase">--</span>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">✨</span>
+                <div class="detail-info">
+                    <span class="detail-label">Moon Illumination</span>
+                    <span class="detail-value" id="forecast-moon-illumination">--%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
