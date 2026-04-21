@@ -1,7 +1,7 @@
 ﻿namespace ShowcaseProject.Services.Interfaces
 {
     /// <summary>
-    /// Base service class for Prezentacni Project that provides common dependencies for derived services.
+    /// Base service class for Showcase Project that provides common dependencies for derived services.
     /// </summary>
     public class IShowcaseProjectBaseService
     {
