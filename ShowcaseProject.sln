@@ -9,15 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowcaseProject.Shared.Mode
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowcaseProject.Web", "ShowcaseProject.Web\ShowcaseProject.Web.csproj", "{9EB39055-7617-4335-BA07-23509640F728}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "screenshots", "screenshots", "{E086F57D-6B6A-49B6-853B-015DE96247F1}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\..\..\..\Pictures\Screenshots\current.png = ..\..\..\..\..\Pictures\Screenshots\current.png
-		..\..\..\..\..\Pictures\Screenshots\forecast.png = ..\..\..\..\..\Pictures\Screenshots\forecast.png
-		..\..\..\..\..\Pictures\Screenshots\swagger.png = ..\..\..\..\..\Pictures\Screenshots\swagger.png
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,9 +30,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{E086F57D-6B6A-49B6-853B-015DE96247F1} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {67183146-1F8B-4B4B-B4F5-BB3662B8B8F8}
