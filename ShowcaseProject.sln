@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36310.24
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowcaseProject.RestApi", "ShowcaseProject\ShowcaseProject.RestApi.csproj", "{9A4EDCC8-A36F-479D-8056-11067C5290D5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowcaseProject.RestApi", "ShowcaseProject.Rest\ShowcaseProject.RestApi.csproj", "{9A4EDCC8-A36F-479D-8056-11067C5290D5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowcaseProject.Shared.Model", "ShowcaseProject.Shared\ShowcaseProject.Shared.Model.csproj", "{177A4015-018C-4FC5-8833-DB04F449DC5A}"
 EndProject
