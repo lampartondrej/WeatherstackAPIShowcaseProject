@@ -9,67 +9,60 @@ namespace ShowcaseProject.RestApi.CustomHelpers
     /// </summary>
     public class BuildUriStringForWeatherstack
     {
+        private const int EstimatedQueryStringLength = 128;
+
         public string BuildUriForCurrentWeather(GetCurrentWeatherRequest currentRequest)
         {
-            try
-            {
-                StringBuilder str = new StringBuilder();
-                str.Append($"{currentRequest.Location}");
-                if (!string.IsNullOrEmpty(currentRequest.units))
-                {
-                    str.Append($"&units={currentRequest.units}");
-                }
-                if (!string.IsNullOrEmpty(currentRequest.language))
-                {
-                    str.Append($"&language={currentRequest.language}");
-                }
-                if (!string.IsNullOrEmpty(currentRequest.callback))
-                {
-                    str.Append($"&callback={currentRequest.callback}");
-                }
-                return str.ToString();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Failed to build URI for current weather", ex);
-            }
+            ArgumentNullException.ThrowIfNull(currentRequest);
+            ArgumentException.ThrowIfNullOrWhiteSpace(currentRequest.Location);
+
+            var queryString = new StringBuilder(EstimatedQueryStringLength);
+            queryString.Append(currentRequest.Location);
+
+            AppendParameter(queryString, "units", currentRequest.units);
+            AppendParameter(queryString, "language", currentRequest.language);
+            AppendParameter(queryString, "callback", currentRequest.callback);
+
+            return queryString.ToString();
         }
 
         public string BuildUriForForecastWeather(GetForecastWeatherRequest forecastRequest)
         {
-            try
+            ArgumentNullException.ThrowIfNull(forecastRequest);
+            ArgumentException.ThrowIfNullOrWhiteSpace(forecastRequest.Location);
+
+            var queryString = new StringBuilder(EstimatedQueryStringLength);
+            queryString.Append(forecastRequest.Location);
+
+            AppendParameter(queryString, "forecast_days", forecastRequest.forecastDays);
+            AppendParameter(queryString, "hourly", forecastRequest.hourly);
+            AppendParameter(queryString, "interval", forecastRequest.interval);
+            AppendParameter(queryString, "units", forecastRequest.units);
+            AppendParameter(queryString, "language", forecastRequest.language);
+            AppendParameter(queryString, "callback", forecastRequest.callback);
+
+            return queryString.ToString();
+        }
+
+        private static void AppendParameter(StringBuilder queryString, string parameterName, string? value)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
             {
-                StringBuilder str = new StringBuilder();
-                str.Append(forecastRequest.Location);
-                if (forecastRequest.forecastDays.HasValue)
-                {
-                    str.Append($"&forecast_days={forecastRequest.forecastDays.Value}");
-                }
-                if (forecastRequest.hourly.HasValue)
-                {
-                    str.Append($"&hourly={forecastRequest.hourly.Value}");
-                }
-                if (forecastRequest.interval.HasValue)
-                {
-                    str.Append($"&interval={forecastRequest.interval.Value}");
-                }
-                if (!string.IsNullOrEmpty(forecastRequest.units))
-                {
-                    str.Append($"&units={forecastRequest.units}");
-                }
-                if (!string.IsNullOrEmpty(forecastRequest.language))
-                {
-                    str.Append($"&language={forecastRequest.language}");
-                }
-                if (!string.IsNullOrEmpty(forecastRequest.callback))
-                {
-                    str.Append($"&callback={forecastRequest.callback}");
-                }
-                return str.ToString();
+                queryString.Append('&')
+                           .Append(parameterName)
+                           .Append('=')
+                           .Append(value);
             }
-            catch (Exception ex)
+        }
+
+        private static void AppendParameter(StringBuilder queryString, string parameterName, int? value)
+        {
+            if (value.HasValue)
             {
-                throw new InvalidOperationException("Failed to build URI for forecast weather", ex);
+                queryString.Append('&')
+                           .Append(parameterName)
+                           .Append('=')
+                           .Append(value.Value);
             }
         }
     }
