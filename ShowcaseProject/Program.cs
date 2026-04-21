@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authentication;
+using Polly;
+using Polly.Extensions.Http;
 using Serilog;
 
 namespace ShowcaseProject
 {
-    public class Program
+    public partial class Program
     {
         public static void Main(string[] args)
         {
@@ -33,7 +35,29 @@ namespace ShowcaseProject
                 builder.Services.AddAuthorization();
 
                 //register services
-                builder.Services.AddHttpClient();
+                builder.Services.AddHttpClient("WeatherServiceClient")
+                    .AddPolicyHandler((serviceProvider, request) =>
+                    {
+                        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                        return HttpPolicyExtensions
+                            .HandleTransientHttpError()
+                            .Or<TimeoutException>()
+                            .WaitAndRetryAsync(
+                                retryCount: 3,
+                                sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                                onRetry: (outcome, timespan, retryAttempt, context) =>
+                                {
+                                    logger.LogWarning(
+                                        "Retry attempt {RetryAttempt} for {PolicyKey} due to {Exception} after waiting {Delay}s",
+                                        retryAttempt,
+                                        context.PolicyKey,
+                                        outcome.Exception?.GetType().Name ?? outcome.Result?.StatusCode.ToString(),
+                                        timespan.TotalSeconds);
+                                });
+                    })
+                    .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(5)));
+
+                builder.Services.AddMemoryCache();
                 builder.Services.AddHealthChecks();
                 builder.Services.AddScoped<Services.Interfaces.IWeatherService, Services.WeatherService>();
 
