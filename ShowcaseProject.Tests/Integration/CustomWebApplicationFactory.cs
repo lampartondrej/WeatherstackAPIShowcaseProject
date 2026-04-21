@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ShowcaseProject.Services.Interfaces;
+using ShowcaseProject.Web;
 
 namespace ShowcaseProject.Tests.Integration
 {

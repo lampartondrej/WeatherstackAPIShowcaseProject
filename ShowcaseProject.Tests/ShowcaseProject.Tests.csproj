@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ShowcaseProject\ShowcaseProject.RestApi.csproj" />
+    <ProjectReference Include="..\ShowcaseProject.Rest\ShowcaseProject.RestApi.csproj" />
     <ProjectReference Include="..\ShowcaseProject.Shared\ShowcaseProject.Shared.Model.csproj" />
     <ProjectReference Include="..\ShowcaseProject.Web\ShowcaseProject.Web.csproj" />
   </ItemGroup>
