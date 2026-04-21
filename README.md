@@ -170,18 +170,6 @@ Authorization: Basic base64(username:password)
 
 ---
 
-## 🚧 Possible Improvements
-
-* Caching (MemoryCache / Redis)
-* Retry policies (Polly)
-* Rate limiting
-* Docker support
-* CI/CD pipeline
-* Improved error handling
-* Frontend upgrade (React / Blazor)
-
----
-
 ## 📌 What This Project Demonstrates
 
 * Integration with external APIs
