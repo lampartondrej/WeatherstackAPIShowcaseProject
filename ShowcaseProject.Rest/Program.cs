@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Polly;
 using Polly.Extensions.Http;
 using Serilog;
+using Serilog.Sinks.MSSqlServer;
 
 namespace ShowcaseProject
 {
@@ -9,11 +10,26 @@ namespace ShowcaseProject
     {
         public static void Main(string[] args)
         {
-            // Configure Serilog early in the application startup
+            // Build configuration first
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+                .Build();
+
+            // Get connection string
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+            // Configure Serilog with direct connection string
             Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(new ConfigurationBuilder()
-                    .AddJsonFile("appsettings.json")
-                    .Build())
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+                .WriteTo.MSSqlServer(
+                    connectionString: connectionString,
+                    sinkOptions: new MSSqlServerSinkOptions
+                    {
+                        TableName = "Logs",
+                        AutoCreateSqlTable = true
+                    })
                 .CreateLogger();
 
             try

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ShowcaseProject.Controllers
 {
     /// <summary>
-    /// Base controller for the Prezentacni Projekt API.
+    /// Base controller for the Showcase Project API.
     /// Provides common functionality and enforces authentication for all derived controllers.
     /// </summary>
     [ApiController]

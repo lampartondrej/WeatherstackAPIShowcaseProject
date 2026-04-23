@@ -71,8 +71,8 @@ namespace ShowcaseProject.Services
                 var queryString = buildUriHelper.BuildUriForCurrentWeather(currentWeatherRequest);
                 var requestUrl = $"{WeatherApiBaseUrl}/{CurrentWeatherEndpoint}?access_key={WeatherApiKey}&query={queryString}";
 
+                _logger.LogInformation("Requesting current weather for location: {Location}, endpoint: {Endpoint}", currentWeatherRequest.Location, CurrentWeatherEndpoint);
                 var response = await httpClient.GetAsync(requestUrl);
-                _logger.LogInformation("Requested current weather data with URL: {RequestUrl}", requestUrl);
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
@@ -135,8 +135,8 @@ namespace ShowcaseProject.Services
                 var queryString = buildUriHelper.BuildUriForForecastWeather(forecastWeatherRequest);
                 var requestUrl = $"{WeatherApiBaseUrl}/{ForecastWeatherEndpoint}?access_key={WeatherApiKey}&query={queryString}";
 
+                _logger.LogInformation("Requesting forecast weather for location: {Location}, endpoint: {Endpoint}", forecastWeatherRequest.Location, ForecastWeatherEndpoint);
                 var response = await httpClient.GetAsync(requestUrl);
-                _logger.LogInformation("Requested forecast weather data with URL: {RequestUrl}", requestUrl);
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
