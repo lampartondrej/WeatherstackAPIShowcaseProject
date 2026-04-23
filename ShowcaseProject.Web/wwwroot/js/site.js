@@ -78,7 +78,10 @@ function getWeatherIcon(weatherCode, weatherDescription, isDay) {
     return isDayTime ? '🌤️' : '🌙';
 }
 
-document.addEventListener('DOMContentLoaded', setTimeBasedBackground);
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeBasedBackground();
+    checkSavedLocation();
+});
 setInterval(setTimeBasedBackground, 60000);
 
 // Tab navigation functionality
