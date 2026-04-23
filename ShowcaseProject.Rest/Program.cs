@@ -10,33 +10,28 @@ namespace ShowcaseProject
     {
         public static void Main(string[] args)
         {
-            // Build configuration first
-            var configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
-                .Build();
-
-            // Get connection string
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
-
-            // Configure Serilog with direct connection string
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
-                .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
-                .WriteTo.MSSqlServer(
-                    connectionString: connectionString,
-                    sinkOptions: new MSSqlServerSinkOptions
-                    {
-                        TableName = "Logs",
-                        AutoCreateSqlTable = true
-                    })
-                .CreateLogger();
-
             try
             {
-                Log.Information("Starting web application");
-
                 var builder = WebApplication.CreateBuilder(args);
+
+                // Configure Serilog using the builder's configuration
+                try
+                {
+                    Log.Logger = new LoggerConfiguration()
+                        .ReadFrom.Configuration(builder.Configuration)
+                        .CreateLogger();
+
+                    Log.Information("Starting web application");
+                }
+                catch (Exception ex)
+                {
+                    // Fallback to console logging if Serilog configuration fails
+                    Log.Logger = new LoggerConfiguration()
+                        .WriteTo.Console()
+                        .CreateLogger();
+
+                    Log.Warning(ex, "Failed to configure Serilog from configuration. Using console logging as fallback.");
+                }
 
                 // Add Serilog to the application
                 builder.Host.UseSerilog();
