@@ -1,47 +1,48 @@
 ﻿using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Current.Request;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Forecast.Request;
+using ShowcaseProject.RestApi.CustomHelpers;
 using System.Text;
 
 namespace ShowcaseProject.RestApi.CustomHelpers
 {
     /// <summary>
-    /// Helper class for building URI query strings for Weatherstack API requests.
+    /// Builds URL-encoded query strings for Weatherstack API requests.
     /// </summary>
-    public class BuildUriStringForWeatherstack
+    public class BuildUriStringForWeatherstack : IWeatherstackRequestBuilder
     {
         private const int EstimatedQueryStringLength = 128;
 
-        public string BuildUriForCurrentWeather(GetCurrentWeatherRequest currentRequest)
+        public string BuildQueryForCurrentWeather(GetCurrentWeatherRequest request)
         {
-            ArgumentNullException.ThrowIfNull(currentRequest);
-            ArgumentException.ThrowIfNullOrWhiteSpace(currentRequest.Location);
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentException.ThrowIfNullOrWhiteSpace(request.Location);
 
-            var queryString = new StringBuilder(EstimatedQueryStringLength);
-            queryString.Append(currentRequest.Location);
+            var query = new StringBuilder(EstimatedQueryStringLength);
+            query.Append(Uri.EscapeDataString(request.Location));
 
-            AppendParameter(queryString, "units", currentRequest.units);
-            AppendParameter(queryString, "language", currentRequest.language);
-            AppendParameter(queryString, "callback", currentRequest.callback);
+            AppendParameter(query, "units", request.units);
+            AppendParameter(query, "language", request.language);
+            AppendParameter(query, "callback", request.callback);
 
-            return queryString.ToString();
+            return query.ToString();
         }
 
-        public string BuildUriForForecastWeather(GetForecastWeatherRequest forecastRequest)
+        public string BuildQueryForForecastWeather(GetForecastWeatherRequest request)
         {
-            ArgumentNullException.ThrowIfNull(forecastRequest);
-            ArgumentException.ThrowIfNullOrWhiteSpace(forecastRequest.Location);
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentException.ThrowIfNullOrWhiteSpace(request.Location);
 
-            var queryString = new StringBuilder(EstimatedQueryStringLength);
-            queryString.Append(forecastRequest.Location);
+            var query = new StringBuilder(EstimatedQueryStringLength);
+            query.Append(Uri.EscapeDataString(request.Location));
 
-            AppendParameter(queryString, "forecast_days", forecastRequest.forecastDays);
-            AppendParameter(queryString, "hourly", forecastRequest.hourly);
-            AppendParameter(queryString, "interval", forecastRequest.interval);
-            AppendParameter(queryString, "units", forecastRequest.units);
-            AppendParameter(queryString, "language", forecastRequest.language);
-            AppendParameter(queryString, "callback", forecastRequest.callback);
+            AppendParameter(query, "forecast_days", request.forecastDays);
+            AppendParameter(query, "hourly", request.hourly);
+            AppendParameter(query, "interval", request.interval);
+            AppendParameter(query, "units", request.units);
+            AppendParameter(query, "language", request.language);
+            AppendParameter(query, "callback", request.callback);
 
-            return queryString.ToString();
+            return query.ToString();
         }
 
         private static void AppendParameter(StringBuilder queryString, string parameterName, string? value)
@@ -51,7 +52,7 @@ namespace ShowcaseProject.RestApi.CustomHelpers
                 queryString.Append('&')
                            .Append(parameterName)
                            .Append('=')
-                           .Append(value);
+                           .Append(Uri.EscapeDataString(value));
             }
         }
 

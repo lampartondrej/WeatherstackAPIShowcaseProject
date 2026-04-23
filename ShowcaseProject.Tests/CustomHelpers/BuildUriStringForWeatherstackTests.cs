@@ -6,17 +6,17 @@ namespace ShowcaseProject.Tests.CustomHelpers
 {
     public class BuildUriStringForWeatherstackTests
     {
-        private readonly BuildUriStringForWeatherstack _uriBuilder;
+        private readonly IWeatherstackRequestBuilder _uriBuilder;
 
         public BuildUriStringForWeatherstackTests()
         {
             _uriBuilder = new BuildUriStringForWeatherstack();
         }
 
-        #region BuildUriForCurrentWeather Tests
+        #region BuildQueryForCurrentWeather Tests
 
         [Fact]
-        public void BuildUriForCurrentWeather_WithLocationOnly_ReturnsLocationString()
+        public void BuildQueryForCurrentWeather_WithLocationOnly_ReturnsLocationString()
         {
             // Arrange
             var request = new GetCurrentWeatherRequest
@@ -25,14 +25,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForCurrentWeather(request);
+            var result = _uriBuilder.BuildQueryForCurrentWeather(request);
 
             // Assert
             Assert.Equal("Prague", result);
         }
 
         [Fact]
-        public void BuildUriForCurrentWeather_WithLocationAndUnits_ReturnsCorrectString()
+        public void BuildQueryForCurrentWeather_WithLocationAndUnits_ReturnsCorrectString()
         {
             // Arrange
             var request = new GetCurrentWeatherRequest
@@ -42,14 +42,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForCurrentWeather(request);
+            var result = _uriBuilder.BuildQueryForCurrentWeather(request);
 
             // Assert
             Assert.Equal("London&units=m", result);
         }
 
         [Fact]
-        public void BuildUriForCurrentWeather_WithLocationAndLanguage_ReturnsCorrectString()
+        public void BuildQueryForCurrentWeather_WithLocationAndLanguage_ReturnsCorrectString()
         {
             // Arrange
             var request = new GetCurrentWeatherRequest
@@ -59,14 +59,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForCurrentWeather(request);
+            var result = _uriBuilder.BuildQueryForCurrentWeather(request);
 
             // Assert
             Assert.Equal("Paris&language=fr", result);
         }
 
         [Fact]
-        public void BuildUriForCurrentWeather_WithLocationAndCallback_ReturnsCorrectString()
+        public void BuildQueryForCurrentWeather_WithLocationAndCallback_ReturnsCorrectString()
         {
             // Arrange
             var request = new GetCurrentWeatherRequest
@@ -76,14 +76,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForCurrentWeather(request);
+            var result = _uriBuilder.BuildQueryForCurrentWeather(request);
 
             // Assert
             Assert.Equal("Berlin&callback=myCallback", result);
         }
 
         [Fact]
-        public void BuildUriForCurrentWeather_WithAllParameters_ReturnsCompleteString()
+        public void BuildQueryForCurrentWeather_WithAllParameters_ReturnsCompleteString()
         {
             // Arrange
             var request = new GetCurrentWeatherRequest
@@ -95,14 +95,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForCurrentWeather(request);
+            var result = _uriBuilder.BuildQueryForCurrentWeather(request);
 
             // Assert
-            Assert.Equal("New York&units=f&language=en&callback=testCallback", result);
+            Assert.Equal("New%20York&units=f&language=en&callback=testCallback", result);
         }
 
         [Fact]
-        public void BuildUriForCurrentWeather_WithEmptyOptionalParameters_IgnoresEmptyValues()
+        public void BuildQueryForCurrentWeather_WithEmptyOptionalParameters_IgnoresEmptyValues()
         {
             // Arrange
             var request = new GetCurrentWeatherRequest
@@ -114,14 +114,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForCurrentWeather(request);
+            var result = _uriBuilder.BuildQueryForCurrentWeather(request);
 
             // Assert
             Assert.Equal("Tokyo", result);
         }
 
         [Fact]
-        public void BuildUriForCurrentWeather_WithSpecialCharactersInLocation_ReturnsLocation()
+        public void BuildQueryForCurrentWeather_WithSpecialCharactersInLocation_ReturnsLocation()
         {
             // Arrange
             var request = new GetCurrentWeatherRequest
@@ -130,18 +130,18 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForCurrentWeather(request);
+            var result = _uriBuilder.BuildQueryForCurrentWeather(request);
 
             // Assert
-            Assert.Equal("S?o Paulo", result);
+            Assert.Equal(Uri.EscapeDataString("S?o Paulo"), result);
         }
 
         #endregion
 
-        #region BuildUriForForecastWeather Tests
+        #region BuildQueryForForecastWeather Tests
 
         [Fact]
-        public void BuildUriForForecastWeather_WithLocationOnly_ReturnsLocationString()
+        public void BuildQueryForForecastWeather_WithLocationOnly_ReturnsLocationString()
         {
             // Arrange
             var request = new GetForecastWeatherRequest
@@ -150,14 +150,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForForecastWeather(request);
+            var result = _uriBuilder.BuildQueryForForecastWeather(request);
 
             // Assert
             Assert.Equal("Prague", result);
         }
 
         [Fact]
-        public void BuildUriForForecastWeather_WithForecastDays_ReturnsCorrectString()
+        public void BuildQueryForForecastWeather_WithForecastDays_ReturnsCorrectString()
         {
             // Arrange
             var request = new GetForecastWeatherRequest
@@ -167,14 +167,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForForecastWeather(request);
+            var result = _uriBuilder.BuildQueryForForecastWeather(request);
 
             // Assert
             Assert.Equal("London&forecast_days=5", result);
         }
 
         [Fact]
-        public void BuildUriForForecastWeather_WithHourly_ReturnsCorrectString()
+        public void BuildQueryForForecastWeather_WithHourly_ReturnsCorrectString()
         {
             // Arrange
             var request = new GetForecastWeatherRequest
@@ -184,14 +184,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForForecastWeather(request);
+            var result = _uriBuilder.BuildQueryForForecastWeather(request);
 
             // Assert
             Assert.Equal("Paris&hourly=1", result);
         }
 
         [Fact]
-        public void BuildUriForForecastWeather_WithInterval_ReturnsCorrectString()
+        public void BuildQueryForForecastWeather_WithInterval_ReturnsCorrectString()
         {
             // Arrange
             var request = new GetForecastWeatherRequest
@@ -201,14 +201,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForForecastWeather(request);
+            var result = _uriBuilder.BuildQueryForForecastWeather(request);
 
             // Assert
             Assert.Equal("Berlin&interval=3", result);
         }
 
         [Fact]
-        public void BuildUriForForecastWeather_WithUnits_ReturnsCorrectString()
+        public void BuildQueryForForecastWeather_WithUnits_ReturnsCorrectString()
         {
             // Arrange
             var request = new GetForecastWeatherRequest
@@ -218,14 +218,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForForecastWeather(request);
+            var result = _uriBuilder.BuildQueryForForecastWeather(request);
 
             // Assert
             Assert.Equal("Rome&units=m", result);
         }
 
         [Fact]
-        public void BuildUriForForecastWeather_WithLanguage_ReturnsCorrectString()
+        public void BuildQueryForForecastWeather_WithLanguage_ReturnsCorrectString()
         {
             // Arrange
             var request = new GetForecastWeatherRequest
@@ -235,14 +235,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForForecastWeather(request);
+            var result = _uriBuilder.BuildQueryForForecastWeather(request);
 
             // Assert
             Assert.Equal("Madrid&language=es", result);
         }
 
         [Fact]
-        public void BuildUriForForecastWeather_WithCallback_ReturnsCorrectString()
+        public void BuildQueryForForecastWeather_WithCallback_ReturnsCorrectString()
         {
             // Arrange
             var request = new GetForecastWeatherRequest
@@ -252,14 +252,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForForecastWeather(request);
+            var result = _uriBuilder.BuildQueryForForecastWeather(request);
 
             // Assert
             Assert.Equal("Amsterdam&callback=myCallback", result);
         }
 
         [Fact]
-        public void BuildUriForForecastWeather_WithAllParameters_ReturnsCompleteString()
+        public void BuildQueryForForecastWeather_WithAllParameters_ReturnsCompleteString()
         {
             // Arrange
             var request = new GetForecastWeatherRequest
@@ -274,14 +274,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForForecastWeather(request);
+            var result = _uriBuilder.BuildQueryForForecastWeather(request);
 
             // Assert
-            Assert.Equal("New York&forecast_days=7&hourly=1&interval=6&units=f&language=en&callback=weatherCallback", result);
+            Assert.Equal("New%20York&forecast_days=7&hourly=1&interval=6&units=f&language=en&callback=weatherCallback", result);
         }
 
         [Fact]
-        public void BuildUriForForecastWeather_WithEmptyOptionalParameters_IgnoresEmptyValues()
+        public void BuildQueryForForecastWeather_WithEmptyOptionalParameters_IgnoresEmptyValues()
         {
             // Arrange
             var request = new GetForecastWeatherRequest
@@ -293,14 +293,14 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForForecastWeather(request);
+            var result = _uriBuilder.BuildQueryForForecastWeather(request);
 
             // Assert
             Assert.Equal("Tokyo", result);
         }
 
         [Fact]
-        public void BuildUriForForecastWeather_WithMixedParameters_ReturnsCorrectString()
+        public void BuildQueryForForecastWeather_WithMixedParameters_ReturnsCorrectString()
         {
             // Arrange
             var request = new GetForecastWeatherRequest
@@ -312,7 +312,7 @@ namespace ShowcaseProject.Tests.CustomHelpers
             };
 
             // Act
-            var result = _uriBuilder.BuildUriForForecastWeather(request);
+            var result = _uriBuilder.BuildQueryForForecastWeather(request);
 
             // Assert
             Assert.Equal("Vienna&forecast_days=3&units=m&language=de", result);

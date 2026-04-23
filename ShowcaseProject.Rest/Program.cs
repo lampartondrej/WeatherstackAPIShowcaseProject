@@ -3,6 +3,9 @@ using Polly;
 using Polly.Extensions.Http;
 using Serilog;
 using Serilog.Sinks.MSSqlServer;
+using ShowcaseProject.RestApi.CustomHelpers;
+using ShowcaseProject.Services;
+using ShowcaseProject.Services.Interfaces;
 
 namespace ShowcaseProject
 {
@@ -70,7 +73,8 @@ namespace ShowcaseProject
 
                 builder.Services.AddMemoryCache();
                 builder.Services.AddHealthChecks();
-                builder.Services.AddScoped<Services.Interfaces.IWeatherService, Services.WeatherService>();
+                builder.Services.AddScoped<IWeatherstackRequestBuilder, BuildUriStringForWeatherstack>();
+                builder.Services.AddScoped<IWeatherService, WeatherService>();
 
                 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
                 builder.Services.AddEndpointsApiExplorer();
@@ -82,7 +86,7 @@ namespace ShowcaseProject
                         Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
                         Scheme = "basic",
                         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                        Description = "Basic Authorization header using the Bearer scheme."
+                        Description = "Basic authentication. Provide credentials in the format: Basic <base64(username:password)>."
                     });
                     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
                     {
@@ -106,11 +110,11 @@ namespace ShowcaseProject
                 app.UseSerilogRequestLogging();
 
                 // Configure the HTTP request pipeline.
-                //if (app.Environment.IsDevelopment())
-                //{
+                // Swagger is intentionally enabled in all environments to allow
+                // API exploration by internal consumers and the integration test suite.
+                // Restrict access via network/auth policy if needed in production.
                 app.UseSwagger();
                 app.UseSwaggerUI();
-                //}
 
                 app.UseHttpsRedirection();
 

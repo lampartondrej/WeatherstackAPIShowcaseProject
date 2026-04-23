@@ -15,13 +15,13 @@ namespace ShowcaseProject.Controllers
         /// <summary>
         /// Logger instance for logging operations within the controller.
         /// </summary>
-        private readonly ILogger<ShowcaseProjectBaseController> _logger;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ShowcaseProjectBaseController"/> class.
         /// </summary>
         /// <param name="logger">The logger instance for logging operations.</param>
-        public ShowcaseProjectBaseController(ILogger<ShowcaseProjectBaseController> logger)
+        public ShowcaseProjectBaseController(ILogger logger)
         {
             _logger = logger;
         }

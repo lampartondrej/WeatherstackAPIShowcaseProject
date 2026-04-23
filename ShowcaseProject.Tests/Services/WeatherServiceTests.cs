@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.Protected;
+using ShowcaseProject.RestApi.CustomHelpers;
 using ShowcaseProject.Services;
 using ShowcaseProject.Services.Interfaces;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Current.Request;
@@ -17,7 +18,7 @@ namespace ShowcaseProject.Tests.Services
 {
     public class WeatherServiceTests : IDisposable
     {
-        private readonly Mock<ILogger<IShowcaseProjectBaseService>> _mockLogger;
+        private readonly Mock<ILogger<WeatherService>> _mockLogger;
         private readonly IConfiguration _configuration;
         private readonly Mock<IHttpClientFactory> _mockHttpClientFactory;
         private readonly Mock<HttpMessageHandler> _mockHttpMessageHandler;
@@ -27,7 +28,7 @@ namespace ShowcaseProject.Tests.Services
 
         public WeatherServiceTests()
         {
-            _mockLogger = new Mock<ILogger<IShowcaseProjectBaseService>>();
+            _mockLogger = new Mock<ILogger<WeatherService>>();
             _configuration = BuildConfiguration();
             _mockHttpClientFactory = new Mock<IHttpClientFactory>();
             _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
@@ -100,7 +101,7 @@ namespace ShowcaseProject.Tests.Services
                 .Setup(x => x.CreateEntry(It.IsAny<object>()))
                 .Returns(mockCacheEntry.Object);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
 
             var request = new GetCurrentWeatherRequest { Location = "Prague" };
 
@@ -124,7 +125,7 @@ namespace ShowcaseProject.Tests.Services
             _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
                 .Returns(httpClient);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
 
             var request = new GetCurrentWeatherRequest { Location = "InvalidCity" };
 
@@ -148,7 +149,7 @@ namespace ShowcaseProject.Tests.Services
             _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
                 .Returns(httpClient);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
 
             var request = new GetCurrentWeatherRequest { Location = "Prague" };
 
@@ -179,7 +180,7 @@ namespace ShowcaseProject.Tests.Services
             _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
                 .Returns(httpClient);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
 
             var request = new GetCurrentWeatherRequest { Location = "Prague" };
 
@@ -217,7 +218,7 @@ namespace ShowcaseProject.Tests.Services
             _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
                 .Returns(httpClient);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
 
             var request = new GetCurrentWeatherRequest
             {
@@ -248,7 +249,7 @@ namespace ShowcaseProject.Tests.Services
             _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
                 .Returns(httpClient);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
 
             var request = new GetCurrentWeatherRequest { Location = "Prague" };
 
@@ -293,7 +294,7 @@ namespace ShowcaseProject.Tests.Services
                 .Setup(x => x.CreateEntry(It.IsAny<object>()))
                 .Returns(mockCacheEntry.Object);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
 
             var request = new GetForecastWeatherRequest { Location = "London" };
 
@@ -317,7 +318,7 @@ namespace ShowcaseProject.Tests.Services
             _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
                 .Returns(httpClient);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
 
             var request = new GetForecastWeatherRequest { Location = "InvalidCity" };
 
@@ -341,7 +342,7 @@ namespace ShowcaseProject.Tests.Services
             _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
                 .Returns(httpClient);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
 
             var request = new GetForecastWeatherRequest { Location = "Paris" };
 
@@ -379,7 +380,7 @@ namespace ShowcaseProject.Tests.Services
             _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
                 .Returns(httpClient);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
 
             var request = new GetForecastWeatherRequest
             {
@@ -418,7 +419,7 @@ namespace ShowcaseProject.Tests.Services
             _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
                 .Returns(httpClient);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
 
             var request = new GetForecastWeatherRequest { Location = "Tokyo" };
 
@@ -448,7 +449,7 @@ namespace ShowcaseProject.Tests.Services
             _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
                 .Returns(httpClient);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
 
             var request = new GetForecastWeatherRequest { Location = "Madrid" };
 
@@ -480,7 +481,7 @@ namespace ShowcaseProject.Tests.Services
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() =>
-                new WeatherService(_mockLogger.Object, emptyConfig, _mockHttpClientFactory.Object, _mockMemoryCache.Object));
+                CreateWeatherService(emptyConfig));
         }
 
         [Fact]
@@ -498,7 +499,7 @@ namespace ShowcaseProject.Tests.Services
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() =>
-                new WeatherService(_mockLogger.Object, partialConfig, _mockHttpClientFactory.Object, _mockMemoryCache.Object));
+                CreateWeatherService(partialConfig));
         }
 
         #endregion
@@ -524,10 +525,10 @@ namespace ShowcaseProject.Tests.Services
 
             object? cacheEntry = cachedWrapper;
             _mockMemoryCache
-                .Setup(x => x.TryGetValue("current_weather_Prague", out cacheEntry))
+                .Setup(x => x.TryGetValue("current|Prague|||", out cacheEntry))
                 .Returns(true);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
             var request = new GetCurrentWeatherRequest { Location = "Prague" };
 
             // Act
@@ -583,7 +584,7 @@ namespace ShowcaseProject.Tests.Services
                 .Setup(x => x.CreateEntry(It.IsAny<object>()))
                 .Returns(mockCacheEntry.Object);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
             var request = new GetCurrentWeatherRequest { Location = "Berlin" };
 
             // Act
@@ -628,10 +629,10 @@ namespace ShowcaseProject.Tests.Services
 
             object? cacheEntry = cachedWrapper;
             _mockMemoryCache
-                .Setup(x => x.TryGetValue("forecast_weather_London", out cacheEntry))
+                .Setup(x => x.TryGetValue("forecast|London||||||", out cacheEntry))
                 .Returns(true);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
             var request = new GetForecastWeatherRequest { Location = "London" };
 
             // Act
@@ -686,7 +687,7 @@ namespace ShowcaseProject.Tests.Services
                 .Setup(x => x.CreateEntry(It.IsAny<object>()))
                 .Returns(mockCacheEntry.Object);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
             var request = new GetForecastWeatherRequest { Location = "Paris" };
 
             // Act
@@ -727,7 +728,7 @@ namespace ShowcaseProject.Tests.Services
                 .Setup(x => x.TryGetValue(It.IsAny<object>(), out cacheEntry))
                 .Returns(false);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
             var request = new GetCurrentWeatherRequest { Location = "InvalidCity" };
 
             // Act
@@ -771,7 +772,7 @@ namespace ShowcaseProject.Tests.Services
                 .Setup(x => x.CreateEntry(It.IsAny<object>()))
                 .Returns(mockCacheEntry.Object);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
             var request = new GetCurrentWeatherRequest { Location = "Tokyo" };
 
             // Act
@@ -779,7 +780,7 @@ namespace ShowcaseProject.Tests.Services
 
             // Assert
             Assert.NotNull(capturedCacheKey);
-            Assert.Equal("current_weather_Tokyo", capturedCacheKey);
+            Assert.Equal("current|Tokyo|||", capturedCacheKey);
         }
 
         private delegate void TryGetValueCallback(object key, out object? value);
@@ -813,7 +814,7 @@ namespace ShowcaseProject.Tests.Services
                 .Setup(x => x.CreateEntry(It.IsAny<object>()))
                 .Returns(mockCacheEntry.Object);
 
-            var service = new WeatherService(_mockLogger.Object, _configuration, _mockHttpClientFactory.Object, _mockMemoryCache.Object);
+            var service = CreateWeatherService();
             var request = new GetForecastWeatherRequest { Location = "Sydney" };
 
             // Act
@@ -821,10 +822,173 @@ namespace ShowcaseProject.Tests.Services
 
             // Assert
             Assert.NotNull(capturedCacheKey);
-            Assert.Equal("forecast_weather_Sydney", capturedCacheKey);
+            // Format: forecast|Location|forecastDays|hourly|interval|units|language|callback
+            Assert.Equal("forecast|Sydney||||||", capturedCacheKey);
         }
 
         #endregion
+
+        #region Cache Key Differentiation Tests
+
+        [Fact]
+        public async Task GetCurrentWeather_AndForecastWeather_SameLocation_HaveDifferentCacheKeys()
+        {
+            // Arrange
+            var jsonResponse = JsonSerializer.Serialize(new CurrentWeatherResponse());
+            var httpClient = CreateMockHttpClient(HttpStatusCode.OK, jsonResponse);
+
+            _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(httpClient);
+
+            var capturedKeys = new List<string?>();
+            object? cacheEntry = null;
+            _mockMemoryCache
+                .Setup(x => x.TryGetValue(It.IsAny<object>(), out cacheEntry))
+                .Callback(new TryGetValueCallback((object key, out object? value) =>
+                {
+                    capturedKeys.Add(key.ToString());
+                    value = null;
+                }))
+                .Returns(false);
+
+            var mockCacheEntry = new Mock<ICacheEntry>();
+            mockCacheEntry.SetupSet(x => x.Value = It.IsAny<object>());
+            mockCacheEntry.SetupSet(x => x.AbsoluteExpirationRelativeToNow = It.IsAny<TimeSpan?>());
+            _mockMemoryCache.Setup(x => x.CreateEntry(It.IsAny<object>())).Returns(mockCacheEntry.Object);
+
+            var service = CreateWeatherService();
+
+            // Act
+            await service.GetCurrentWeather(new GetCurrentWeatherRequest { Location = "Rome" });
+
+            // Re-setup for forecast (different response type)
+            var forecastJson = JsonSerializer.Serialize(new ForecastWeatherResponse());
+            _mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(forecastJson)
+                });
+
+            await service.GetForecastWeather(new GetForecastWeatherRequest { Location = "Rome" });
+
+            // Assert
+            Assert.Equal(2, capturedKeys.Count);
+            Assert.NotEqual(capturedKeys[0], capturedKeys[1]);
+            Assert.StartsWith("current|", capturedKeys[0]);
+            Assert.StartsWith("forecast|", capturedKeys[1]);
+        }
+
+        [Fact]
+        public async Task GetCurrentWeather_WithDifferentParameters_SameLocation_HaveDifferentCacheKeys()
+        {
+            // Arrange
+            var capturedKeys = new List<string?>();
+            object? cacheEntry = null;
+            _mockMemoryCache
+                .Setup(x => x.TryGetValue(It.IsAny<object>(), out cacheEntry))
+                .Callback(new TryGetValueCallback((object key, out object? value) =>
+                {
+                    capturedKeys.Add(key.ToString());
+                    value = null;
+                }))
+                .Returns(false);
+
+            var mockCacheEntry = new Mock<ICacheEntry>();
+            mockCacheEntry.SetupSet(x => x.Value = It.IsAny<object>());
+            mockCacheEntry.SetupSet(x => x.AbsoluteExpirationRelativeToNow = It.IsAny<TimeSpan?>());
+            _mockMemoryCache.Setup(x => x.CreateEntry(It.IsAny<object>())).Returns(mockCacheEntry.Object);
+
+            var jsonResponse = JsonSerializer.Serialize(new CurrentWeatherResponse());
+            _mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(jsonResponse)
+                });
+            _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(new HttpClient(_mockHttpMessageHandler.Object));
+
+            var service = CreateWeatherService();
+
+            // Act
+            await service.GetCurrentWeather(new GetCurrentWeatherRequest { Location = "Vienna", units = "m" });
+            await service.GetCurrentWeather(new GetCurrentWeatherRequest { Location = "Vienna", units = "f" });
+
+            // Assert
+            Assert.Equal(2, capturedKeys.Count);
+            Assert.NotEqual(capturedKeys[0], capturedKeys[1]);
+            Assert.Equal("current|Vienna|m||", capturedKeys[0]);
+            Assert.Equal("current|Vienna|f||", capturedKeys[1]);
+        }
+
+        [Fact]
+        public async Task GetForecastWeather_WithDifferentForecastDays_SameLocation_HaveDifferentCacheKeys()
+        {
+            // Arrange
+            var capturedKeys = new List<string?>();
+            object? cacheEntry = null;
+            _mockMemoryCache
+                .Setup(x => x.TryGetValue(It.IsAny<object>(), out cacheEntry))
+                .Callback(new TryGetValueCallback((object key, out object? value) =>
+                {
+                    capturedKeys.Add(key.ToString());
+                    value = null;
+                }))
+                .Returns(false);
+
+            var mockCacheEntry = new Mock<ICacheEntry>();
+            mockCacheEntry.SetupSet(x => x.Value = It.IsAny<object>());
+            mockCacheEntry.SetupSet(x => x.AbsoluteExpirationRelativeToNow = It.IsAny<TimeSpan?>());
+            _mockMemoryCache.Setup(x => x.CreateEntry(It.IsAny<object>())).Returns(mockCacheEntry.Object);
+
+            var jsonResponse = JsonSerializer.Serialize(new ForecastWeatherResponse());
+            _mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent(jsonResponse)
+                });
+            _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(new HttpClient(_mockHttpMessageHandler.Object));
+
+            var service = CreateWeatherService();
+
+            // Act
+            await service.GetForecastWeather(new GetForecastWeatherRequest { Location = "Athens", forecastDays = 3 });
+            await service.GetForecastWeather(new GetForecastWeatherRequest { Location = "Athens", forecastDays = 7 });
+
+            // Assert
+            Assert.Equal(2, capturedKeys.Count);
+            Assert.NotEqual(capturedKeys[0], capturedKeys[1]);
+            Assert.Equal("forecast|Athens|3|||||", capturedKeys[0]);
+            Assert.Equal("forecast|Athens|7|||||", capturedKeys[1]);
+        }
+
+        #endregion
+
+        private WeatherService CreateWeatherService(IConfiguration? config = null)
+        {
+            var requestBuilder = new BuildUriStringForWeatherstack();
+            return new WeatherService(
+                _mockLogger.Object,
+                config ?? _configuration,
+                _mockHttpClientFactory.Object,
+                _mockMemoryCache.Object,
+                requestBuilder);
+        }
 
         public void Dispose()
         {
