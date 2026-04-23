@@ -1,206 +1,103 @@
-//TODO: Add screenshots/screenshare b4 master PR
-# 🌦️ Weather Forecast App (.NET)
+# Weatherstack API Showcase Project
 
-A modern **ASP.NET Core application** for retrieving current weather and forecasts using an external API.
-This project demonstrates practical usage of **REST APIs, MVC architecture, configuration management, authentication, and clean service design**.
+> ⚠️ **Note:** This project was previously named *PrezentacniProjekt*.
+> Any remaining references to the old name are considered deprecated.
 
----
+## 📌 Overview
 
-## 🚀 Overview
+This project is a **.NET showcase application** built around integration with the **Weatherstack API**.
 
-The application consists of two main parts:
+It was created as a **portfolio project for junior / junior+ backend developer roles**, with focus on clean project structure, external API integration, basic authentication, resilience, caching, and testability.
 
-* **REST API** – handles communication with the external Weather API
-* **MVC Web App** – provides a user interface for displaying weather data
+The solution consists of:
 
-The system is designed to separate concerns between presentation, business logic, and external integrations.
+* `ShowcaseProject.Rest` – REST API backend
+* `ShowcaseProject.Web` – MVC frontend consuming the REST API
+* `ShowcaseProject.Shared` – shared DTOs and models
+* `ShowcaseProject.Tests` – automated tests
 
----
+## 🚀 Features
 
-## 🧱 Architecture
-
-```
-[ MVC Web App ]
-        ↓
-[ ASP.NET Core API ]
-        ↓
-[ External Weather API ]
-```
-
-* The web app communicates with the internal API
-* The API processes requests, handles authentication, and calls the external service
-* Data is mapped into DTO models for structured handling
-
----
-
-## 🛠️ Technologies
-
-* .NET 8 / ASP.NET Core
-* ASP.NET MVC
-* REST API
-* C#
-* HttpClientFactory
-* Serilog (logging)
+* External API integration with Weatherstack
+* REST API built with ASP.NET Core
+* MVC frontend for manual testing / presentation
 * Basic Authentication
-* Swagger / OpenAPI
+* Resilience using Polly
+* In-memory caching
+* Swagger (OpenAPI)
+* Health checks
+* Structured logging
+* Automated testing
 
----
+## ⚙️ Setup
 
-## ✨ Features
-
-* 🔍 Search weather by city
-* 🌡️ Current weather (temperature, humidity, wind, etc.)
-* 📅 Multi-day forecast
-* 🔐 Secured API (Basic Authentication)
-* 📜 Structured logging
-* ⚙️ Configuration via environment variables
-
----
-
-## 🖼️ Screenshots
-
-### Current view
-
-![Current](./docs/screenshots/current.png)
-
-### Forecast view
-
-![Forecast](./docs/screenshots/forecast.png)
-
-Note: Weatherstack API does not provide weather forcast on their open api model and it is paid function.
-For this showcase project weather forecast is disabled and only simulated.
-
-### Swagger API
-
-![Swagger](./docs/screenshots/swagger.png)
-
----
-
-## ⚙️ Getting Started
-
-### 1. Clone repository
+1. Clone repository:
 
 ```bash
-git clone https://github.com/lampartondrej/PrezentacniProjekt.git
-cd PrezentacniProjekt
+git clone https://github.com/lampartondrej/WeatherstackAPIShowcaseProject.git
+cd WeatherstackAPIShowcaseProject
 ```
 
----
+2. Configure environment variables:
 
-### 2. Configure environment variables
+* `WeatherApiKey`
+* `ShowcaseProjectApiUsername`
+* `ShowcaseProjectApiPassword`
 
-Create a `.env` file or set variables manually:
+3. Run the REST API:
 
 ```bash
-WeatherApi__ApiKey=YOUR_API_KEY
-BasicAuth__Username=YOUR_GUID_USERNAME
-BasicAuth__Password=YOUR_GUID_PASSWORD
+dotnet run --project ShowcaseProject.Rest
 ```
 
----
-
-### 3. Run API
+4. (Optional) Run MVC frontend:
 
 ```bash
-cd PrezentacniProjekt
-dotnet run
+dotnet run --project ShowcaseProject.Web
 ```
 
-API will be available at:
-
-```
-https://localhost:5001
-```
-
-Swagger UI:
-
-```
-https://localhost:5001/swagger
-```
-
----
-
-### 4. Run Web App
-
-```bash
-cd PrezentacniProjekt.Web
-dotnet run
-```
-
-Web app will be available at:
-
-```
-https://localhost:5002
-```
-
----
-
-## 🔌 API Endpoints (examples)
-
-### Get current weather
-
-```
-GET /api/weather/current?city=Prague
-```
-
-### Get forecast
-
-```
-GET /api/weather/forecast?city=Prague&days=3
-```
-
----
+5. Open Swagger UI after startup to test the REST API endpoints.
 
 ## 🔐 Authentication
 
 The API uses **Basic Authentication**.
 
-Example header:
+Credentials must be provided via environment variables:
 
+* `ShowcaseProjectApiUsername`
+* `ShowcaseProjectApiPassword`
+
+Authenticated requests must include the `Authorization` header in Basic Auth format.
+
+## 🧪 Testing
+
+Run all tests:
+
+```bash
+dotnet test
 ```
-Authorization: Basic base64(username:password)
-```
 
----
+The test project validates the main application flow and selected backend behaviors.
 
-## 🧪 Testing (planned improvements)
+## 📸 Screenshots
 
-* [ ] Unit tests for service layer
-* [ ] HttpClient mocking
-* [ ] Integration tests
+### Current Weather View
 
----
+![Current](./docs/screenshots/current.png)
 
-## 🚧 Possible Improvements
+### Forecast View
 
-* Caching (MemoryCache / Redis)
-* Retry policies (Polly)
-* Rate limiting
-* Docker support
-* CI/CD pipeline
-* Improved error handling
-* Frontend upgrade (React / Blazor)
+![Forecast](./docs/screenshots/forecast.png)
 
----
+### Swagger
 
-## 📌 What This Project Demonstrates
+![Swagger](./docs/screenshots/swagger.png)
 
-* Integration with external APIs
-* Multi-layer application design
-* Dependency injection usage
-* Configuration & environment handling
-* Logging and error handling
-* Basic API security concepts
+> Note: depending on the external provider plan, forecast support may be limited.
+> In this project, the architecture and endpoint flow are implemented regardless of provider-tier constraints.
 
----
+## 📎 Notes
 
-## 👨‍💻 Author
-
-Ondřej Lampart
-GitHub: https://github.com/lampartondrej
-
----
-
-## 📄 License
-
-This project is intended for demonstration and portfolio purposes.
+* This project is intended for demonstration purposes and as a portfolio showcase.
+* It is not intended to be treated as a production-ready system.
+* The main goal is to demonstrate backend-oriented development practices in a small but complete .NET solution.
