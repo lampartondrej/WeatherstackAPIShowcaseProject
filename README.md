@@ -1,205 +1,91 @@
-# 🌦️ Weather Forecast App (.NET)
+# Weatherstack API Showcase Project
 
-A modern **ASP.NET Core application** for retrieving current weather and forecasts using an external API.
-This project demonstrates practical usage of **REST APIs, MVC architecture, configuration management, authentication, and clean service design**.
+> ⚠️ **Note:** This project was previously named *PrezentacniProjekt*.
+> Any remaining references to the old name are considered deprecated.
 
----
+## 📌 Overview
 
-## 🚀 Overview
+This project is a **.NET backend showcase application** demonstrating integration with the Weatherstack API.
 
-The application consists of two main parts:
+It is designed as a **portfolio project for junior / junior+ backend developer roles**.
 
-* **REST API** – handles communication with the external Weather API
-* **MVC Web App** – provides a user interface for displaying weather data
+The solution consists of:
 
-The system is designed to separate concerns between presentation, business logic, and external integrations.
+* `ShowcaseProject.Rest` – REST API backend
+* `ShowcaseProject.Web` – MVC frontend
+* `ShowcaseProject.Shared` – shared DTOs and models
+* `ShowcaseProject.Tests` – integration tests
 
----
+## 🚀 Features
 
-## 🧱 Architecture
-
-```
-[ MVC Web App ]
-        ↓
-[ ASP.NET Core API ]
-        ↓
-[ External Weather API ]
-```
-
-* The web app communicates with the internal API
-* The API processes requests, handles authentication, and calls the external service
-* Data is mapped into DTO models for structured handling
-
----
-
-## 🛠️ Technologies
-
-* .NET 8 / ASP.NET Core
-* ASP.NET MVC
-* REST API
-* C#
-* HttpClientFactory
-* Serilog (logging)
+* External API integration (Weatherstack)
 * Basic Authentication
-* Swagger / OpenAPI
+* Resilience using Polly
+* In-memory caching
+* Swagger (OpenAPI)
+* Health checks
+* Integration testing
 
----
+## ⚙️ Setup
 
-## ✨ Features
-
-* 🔍 Search weather by city
-* 🌡️ Current weather (temperature, humidity, wind, etc.)
-* 📅 Multi-day forecast
-* 🔐 Secured API (Basic Authentication)
-* 📜 Structured logging
-* ⚙️ Configuration via environment variables
-
----
-
-## 🖼️ Screenshots
-
-### Current view
-
-![Current](./docs/screenshots/current.png)
-
-### Forecast view
-
-![Forecast](./docs/screenshots/forecast.png)
-
-Note: Weatherstack API does not provide weather forcast on their open api model and it is paid function.
-For this showcase project weather forecast is disabled and only simulated.
-
-### Swagger API
-
-![Swagger](./docs/screenshots/swagger.png)
-
----
-
-## ⚙️ Getting Started
-
-### 1. Clone repository
+1. Clone repository:
 
 ```bash
-git clone https://github.com/lampartondrej/PrezentacniProjekt.git
-cd PrezentacniProjekt
+git clone https://github.com/lampartondrej/WeatherstackAPIShowcaseProject.git
+cd WeatherstackAPIShowcaseProject
 ```
 
----
+2. Configure environment variables:
 
-### 2. Configure environment variables
+* `WeatherApiKey`
+* `ShowcaseProjectApiUsername`
+* `ShowcaseProjectApiPassword`
 
-Create a `.env` file or set variables manually:
+3. Run the REST API:
 
 ```bash
-WeatherApi__ApiKey=YOUR_API_KEY
-BasicAuth__Username=YOUR_GUID_USERNAME
-BasicAuth__Password=YOUR_GUID_PASSWORD
+dotnet run --project ShowcaseProject.Rest
 ```
 
----
-
-### 3. Run API
+4. (Optional) Run MVC frontend:
 
 ```bash
-cd PrezentacniProjekt
-dotnet run
+dotnet run --project ShowcaseProject.Web
 ```
-
-API will be available at:
-
-```
-https://localhost:5001
-```
-
-Swagger UI:
-
-```
-https://localhost:5001/swagger
-```
-
----
-
-### 4. Run Web App
-
-```bash
-cd PrezentacniProjekt.Web
-dotnet run
-```
-
-Web app will be available at:
-
-```
-https://localhost:5002
-```
-
----
-
-## 🔌 API Endpoints (examples)
-
-### Get current weather
-
-```
-GET /api/weather/current?city=Prague
-```
-
-### Get forecast
-
-```
-GET /api/weather/forecast?city=Prague&days=3
-```
-
----
 
 ## 🔐 Authentication
 
 The API uses **Basic Authentication**.
 
-Example header:
+Credentials must be provided via environment variables:
 
+* `ShowcaseProjectApiUsername`
+* `ShowcaseProjectApiPassword`
+
+## 🧪 Testing
+
+Run tests:
+
+```bash
+dotnet test
 ```
-Authorization: Basic base64(username:password)
-```
 
----
+## Screenshots
 
-## 🧪 Testing (planned improvements)
+### Current Weather View
 
-* [ ] Unit tests for service layer
-* [ ] HttpClient mocking
-* [ ] Integration tests
+![Current](./docs/screenshots/current.png)
 
----
+### Forecast View
 
-## 🚧 Possible Improvements
+![Forecast](./docs/screenshots/forecast.png)
 
-* Caching (MemoryCache / Redis)
-* Retry policies (Polly)
-* Rate limiting
-* Docker support
-* CI/CD pipeline
-* Improved error handling
-* Frontend upgrade (React / Blazor)
+### Swagger
 
----
+![Swagger](./docs/screenshots/swagger.png)
 
-## 📌 What This Project Demonstrates
+> Note: depending on the external provider plan, forecast support may be limited. In this project, the architecture and endpoint flow are implemented regardless of provider-tier constraints.
 
-* Integration with external APIs
-* Multi-layer application design
-* Dependency injection usage
-* Configuration & environment handling
-* Logging and error handling
-* Basic API security concepts
+## 📎 Notes
 
----
-   
-## 👨‍💻 Author
-
-Ondřej Lampart
-GitHub: https://github.com/lampartondrej
-
----
-
-## 📄 License
-
-This project is intended for demonstration and portfolio purposes.
+* This project is intended for demonstration purposes and is not production-ready.
