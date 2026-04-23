@@ -1,4 +1,4 @@
-﻿ // Function to set background class based on local time
+﻿// Function to set background class based on local time
 function setTimeBasedBackground() {
     const body = document.getElementById('dynamic-body');
     if (!body) return;
@@ -78,7 +78,10 @@ function getWeatherIcon(weatherCode, weatherDescription, isDay) {
     return isDayTime ? '🌤️' : '🌙';
 }
 
-document.addEventListener('DOMContentLoaded', setTimeBasedBackground);
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeBasedBackground();
+    checkSavedLocation();
+});
 setInterval(setTimeBasedBackground, 60000);
 
 // Tab navigation functionality
@@ -130,12 +133,11 @@ async function fetchCurrentWeather(location) {
             updateCurrentWeatherUI(data);
             return data;
         } else {
-            console.error('Failed to fetch current weather:', response.status);
-            return null;
+            throw new Error(`Server error: ${response.status}`);
         }
     } catch (error) {
         console.error('Error fetching current weather:', error);
-        return null;
+        throw error; // re-throw so loadWeatherDataWithRetry can catch it
     }
 }
 
@@ -147,12 +149,11 @@ async function fetchForecastWeather(location) {
             updateForecastWeatherUI(data);
             return data;
         } else {
-            console.error('Failed to fetch forecast weather:', response.status);
-            return null;
+            throw new Error(`Server error: ${response.status}`);
         }
     } catch (error) {
         console.error('Error fetching forecast weather:', error);
-        return null;
+        throw error; // re-throw so loadWeatherDataWithRetry can catch it
     }
 }
 
@@ -266,13 +267,7 @@ function setElementText(id, text) {
 
 async function loadWeatherData(location) {
     console.log('Loading weather data for:', location);
-    setElementText('current-description', 'Loading...');
-    //setElementText('forecast-description', 'Loading...');
-    
-    await Promise.all([
-        fetchCurrentWeather(location),
-        //fetchForecastWeather(location)
-    ]);
+    await loadWeatherDataWithRetry(location);
 }
 
 function checkSavedLocation() {
@@ -377,7 +372,69 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    checkSavedLocation();
-});
+// ── Fetch Overlay helpers ────────────────────────────────────
+const fetchOverlay  = document.getElementById('fetch-overlay');
+const fetchLoading  = document.getElementById('fetch-loading');
+const fetchError    = document.getElementById('fetch-error');
+const fetchErrorMsg = document.getElementById('fetch-error-message');
+const fetchLabel    = document.querySelector('.fetch-label');
+const fetchRetryBtn = document.getElementById('fetch-retry-btn');
+
+const MAX_RETRIES = 3;
+
+function showFetchLoading(attempt = 1, max = MAX_RETRIES) {
+    fetchLoading.classList.remove('hidden');
+    fetchError.classList.add('hidden');
+    fetchOverlay.classList.remove('hidden');
+    if (fetchLabel) {
+        fetchLabel.textContent = attempt > 1
+            ? `Retrying… (attempt ${attempt} of ${max})`
+            : 'Fetching weather data…';
+    }
+}
+
+function showFetchError(message) {
+    fetchLoading.classList.add('hidden');
+    fetchErrorMsg.textContent = message || 'The weather service could not be reached. Please try again later.';
+    fetchError.classList.remove('hidden');
+}
+
+function hideFetchOverlay() {
+    fetchOverlay.classList.add('hidden');
+}
+
+async function loadWeatherDataWithRetry(location, attempt = 1) {
+    showFetchLoading(attempt, MAX_RETRIES);
+
+    try {
+        const results = await Promise.all([
+            fetchCurrentWeather(location),
+            // fetchForecastWeather(location)
+        ]);
+
+        const allFailed = results.every(r => r === null);
+        if (allFailed) {
+            throw new Error('No data returned from the weather service.');
+        }
+
+        hideFetchOverlay();
+    } catch (err) {
+        if (attempt < MAX_RETRIES) {
+            // Brief pause before next automatic retry
+            await new Promise(resolve => setTimeout(resolve, 1200));
+            await loadWeatherDataWithRetry(location, attempt + 1);
+        } else {
+            showFetchError(err.message);
+        }
+    }
+}
+
+// Retry button — restarts the full 3-attempt sequence from scratch
+if (fetchRetryBtn) {
+    fetchRetryBtn.addEventListener('click', () => {
+        const savedLocation = localStorage.getItem('weatherLocation');
+        if (savedLocation) {
+            loadWeatherDataWithRetry(savedLocation);
+        }
+    });
+}
