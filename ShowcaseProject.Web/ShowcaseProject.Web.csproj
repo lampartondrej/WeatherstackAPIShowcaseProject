@@ -14,4 +14,8 @@
     <ProjectReference Include="..\ShowcaseProject.Shared\ShowcaseProject.Shared.Model.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.*" />
+  </ItemGroup>
+
 </Project>

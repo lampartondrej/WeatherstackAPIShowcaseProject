@@ -9,7 +9,7 @@ html {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0   .25rem #258cfb;
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0 .25rem #258cfb;
 }
 
 html {
@@ -404,6 +404,90 @@ body {
     font-size: 1rem;
     font-weight: 600;
     color: white;
+}
+
+/* ?? Fetch Overlay ??????????????????????????????????????????? */
+.fetch-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 10, 30, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.fetch-overlay.hidden {
+    display: none;
+}
+
+/* Fully reset .glass-panel sizing – this card is small & self-contained */
+.fetch-overlay-panel {
+    position: relative !important;
+    top: unset !important;
+    left: unset !important;
+    transform: none !important;
+    width: auto !important;
+    max-width: 320px !important;
+    min-height: unset !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    padding: 2.5rem 3rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.fetch-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.fetch-loading.hidden { display: none; }
+.fetch-error.hidden   { display: none; }
+
+/* ?? Dots ring spinner ???????????????????????????????????????? */
+.dots-ring {
+    position: relative;
+    width: 48px;
+    height: 48px;
+}
+
+.dots-ring span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 7px;
+    height: 7px;
+    margin: -3.5px 0 0 -3.5px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    animation: dots-fade 1.2s linear infinite;
+}
+
+.dots-ring span:nth-child(1) { transform: rotate(0deg)   translateY(-18px); animation-delay: 0s;      }
+.dots-ring span:nth-child(2) { transform: rotate(45deg)  translateY(-18px); animation-delay: -1.05s;  }
+.dots-ring span:nth-child(3) { transform: rotate(90deg)  translateY(-18px); animation-delay: -0.9s;   }
+.dots-ring span:nth-child(4) { transform: rotate(135deg) translateY(-18px); animation-delay: -0.75s;  }
+.dots-ring span:nth-child(5) { transform: rotate(180deg) translateY(-18px); animation-delay: -0.6s;   }
+.dots-ring span:nth-child(6) { transform: rotate(225deg) translateY(-18px); animation-delay: -0.45s;  }
+.dots-ring span:nth-child(7) { transform: rotate(270deg) translateY(-18px); animation-delay: -0.3s;   }
+.dots-ring span:nth-child(8) { transform: rotate(315deg) translateY(-18px); animation-delay: -0.15s;  }
+
+@keyframes dots-fade {
+    0%, 100% { opacity: 0.15; }
+    50%       { opacity: 1;    }
 }
 
 /* Responsive adjustments */

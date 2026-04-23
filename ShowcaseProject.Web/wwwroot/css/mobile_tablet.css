@@ -1,0 +1,54 @@
+/* ?? Tablet layout (? 992px) ?????????????????????????????????? */
+@media (max-width: 992px) {
+
+    /* Unpin the absolute-centred body — use padding to clear the fixed navbar */
+    #dynamic-body {
+        min-height: 100vh;
+        padding: 120px 24px 40px;
+        box-sizing: border-box;
+    }
+
+    /* Unpin the glass panel from absolute centre, centre it with margin */
+    .glass-panel {
+        position: relative;
+        top: unset;
+        left: unset;
+        transform: none;
+        width: 100%;
+        max-width: 900px;
+        min-height: unset;
+        margin: 0 auto;
+    }
+
+    /* Explicit grid areas — no ordering ambiguity */
+    .weather-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        grid-template-areas:
+            "main  main"
+            "left  right";
+        gap: 20px;
+        min-height: unset;
+    }
+
+    .weather-main          { grid-area: main;  }
+    .weather-details-left  { grid-area: left;  }
+    .weather-details-right { grid-area: right; }
+
+    .weather-details-left,
+    .weather-details-right {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .detail-item {
+        flex: 1;
+    }
+
+    /* Forecast wraps into a centred multi-row grid */
+    .forecast-days {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}

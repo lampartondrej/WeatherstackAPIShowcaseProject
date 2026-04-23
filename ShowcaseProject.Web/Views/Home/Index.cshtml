@@ -244,3 +244,24 @@
         </div>
     </div>
 </div>
+
+<!-- Fetch overlay: shown while loading, switches to error state on failure -->
+<div id="fetch-overlay" class="fetch-overlay hidden">
+    <div class="fetch-overlay-panel glass-panel">
+        <!-- Loading state -->
+        <div id="fetch-loading" class="fetch-loading">
+            <div class="dots-ring">
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+            </div>
+            <p class="fetch-label">Fetching weather data…</p>
+        </div>
+        <!-- Error state -->
+        <div id="fetch-error" class="fetch-error hidden">
+            <div class="fetch-error-icon">⚠️</div>
+            <p class="fetch-error-title">Unable to fetch data</p>
+            <p class="fetch-error-subtitle" id="fetch-error-message">The weather service could not be reached. Please try again later.</p>
+            <button class="glass-button fetch-retry-btn" id="fetch-retry-btn">Retry</button>
+        </div>
+    </div>
+</div>
