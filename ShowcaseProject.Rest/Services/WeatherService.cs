@@ -7,13 +7,14 @@ using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Current.Response;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Forecast.Request;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Forecast.Response;
 using ShowcaseProject.Shared.Model.Wrapper;
+using ShowcaseProject.RestApi.Services;
 
 namespace ShowcaseProject.Services
 {
     /// <summary>
     /// Service implementation for retrieving weather information from the Weatherstack API.
     /// </summary>
-    public class WeatherService : IShowcaseProjectBaseService, IWeatherService
+    public class WeatherService : ShowcaseProjectBaseService, IWeatherService
     {
         private readonly ILogger<WeatherService> _logger;
         private readonly IConfiguration _configuration;

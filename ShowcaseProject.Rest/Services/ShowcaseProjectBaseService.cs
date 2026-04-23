@@ -1,9 +1,9 @@
-﻿namespace ShowcaseProject.Services.Interfaces
+﻿namespace ShowcaseProject.RestApi.Services
 {
     /// <summary>
     /// Base service class for Showcase Project that provides common dependencies for derived services.
     /// </summary>
-    public class IShowcaseProjectBaseService
+    public class ShowcaseProjectBaseService
     {
         /// <summary>
         /// Logger instance for logging service operations.
@@ -26,7 +26,7 @@
         /// <param name="logger">The logger instance.</param>
         /// <param name="configuration">The configuration instance.</param>
         /// <param name="httpClientFactory">The HTTP client factory instance.</param>
-        public IShowcaseProjectBaseService(ILogger logger, IConfiguration configuration, IHttpClientFactory httpClientFactory)
+        public ShowcaseProjectBaseService(ILogger logger, IConfiguration configuration, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
             _configuration = configuration;
