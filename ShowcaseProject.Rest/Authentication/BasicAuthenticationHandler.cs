@@ -25,18 +25,29 @@ namespace ShowcaseProject
             : base(options, logger, encoder)
         {
             _configuration = configuration;
-            
+
             // Get environment variable names from configuration
-            var usernameEnvVar = _configuration.GetValue<string>("AuthSettings:UsernameEnvVar") 
-                ?? throw new InvalidOperationException("AuthSettings:UsernameEnvVar is not set in configuration.");
-            var passwordEnvVar = _configuration.GetValue<string>("AuthSettings:PasswordEnvVar") 
-                ?? throw new InvalidOperationException("AuthSettings:PasswordEnvVar is not set in configuration.");
-            
-            // Get actual credentials from environment variables
-            _validUsername = Environment.GetEnvironmentVariable(usernameEnvVar) 
-                ?? throw new InvalidOperationException($"Environment variable '{usernameEnvVar}' is not set.");
-            _validPassword = Environment.GetEnvironmentVariable(passwordEnvVar) 
-                ?? throw new InvalidOperationException($"Environment variable '{passwordEnvVar}' is not set.");
+            var usernameEnvVar = _configuration.GetValue<string>("AuthSettings:UsernameEnvVar");
+            var passwordEnvVar = _configuration.GetValue<string>("AuthSettings:PasswordEnvVar");
+
+            // Get actual credentials from environment variables with fallback to configuration
+            if (!string.IsNullOrEmpty(usernameEnvVar) && !string.IsNullOrEmpty(passwordEnvVar))
+            {
+                _validUsername = Environment.GetEnvironmentVariable(usernameEnvVar)
+                    ?? _configuration.GetValue<string>("AuthSettings:Username")
+                    ?? throw new InvalidOperationException($"Neither environment variable '{usernameEnvVar}' nor AuthSettings:Username is set.");
+                _validPassword = Environment.GetEnvironmentVariable(passwordEnvVar)
+                    ?? _configuration.GetValue<string>("AuthSettings:Password")
+                    ?? throw new InvalidOperationException($"Neither environment variable '{passwordEnvVar}' nor AuthSettings:Password is set.");
+            }
+            else
+            {
+                // Fallback to direct configuration values
+                _validUsername = _configuration.GetValue<string>("AuthSettings:Username")
+                    ?? throw new InvalidOperationException("AuthSettings:Username is not set in configuration.");
+                _validPassword = _configuration.GetValue<string>("AuthSettings:Password")
+                    ?? throw new InvalidOperationException("AuthSettings:Password is not set in configuration.");
+            }
         }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()

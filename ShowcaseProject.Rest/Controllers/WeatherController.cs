@@ -5,6 +5,7 @@ using ShowcaseProject.Shared.Model.DTOs.Shared;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Current.Request;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Current.Response;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Forecast.Request;
+using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Forecast.Response;
 using ShowcaseProject.Shared.Model.Wrapper;
 
 namespace ShowcaseProject.RestApi.Controllers
@@ -15,10 +16,10 @@ namespace ShowcaseProject.RestApi.Controllers
     /// </summary>
     public class WeatherController : ShowcaseProjectBaseController
     {
-        private readonly ILogger<ShowcaseProjectBaseController> _logger;
+        private readonly ILogger<WeatherController> _logger;
         private readonly IWeatherService _weatherService;
 
-        public WeatherController(ILogger<ShowcaseProjectBaseController> logger,
+        public WeatherController(ILogger<WeatherController> logger,
             IWeatherService weatherService) : base(logger)
         {
             _logger = logger;
@@ -43,45 +44,27 @@ namespace ShowcaseProject.RestApi.Controllers
                     }
                     else
                     {
-                        var errorMessage = new DetailedErrorMessage
-                        {
-                            Message = "An error occurred while fetching current weather data.",
-                            Details = response.DetailedErrorMessage ?? "No additional information is available.",
-                            HttpStatusCode = StatusCodes.Status400BadRequest
-                        };
-                        return BadRequest(errorMessage);
+                        return BadRequest(ServiceError("An error occurred while fetching current weather data.", response.DetailedErrorMessage));
                     }
                 }
                 else
                 {
-                    var errorMessage = new DetailedErrorMessage
-                    {
-                        Message = "Invalid request model.",
-                        Details = "The provided request did not pass validation.",
-                        HttpStatusCode = StatusCodes.Status400BadRequest
-                    };
-                    return BadRequest(errorMessage);
+                    return BadRequest(ServiceError("Invalid request model.", "The provided request did not pass validation."));
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while fetching current weather data");
-                var errorMessage = new DetailedErrorMessage
-                {
-                    Message = "An unexpected error occurred while processing the request.",
-                    Details = "No additional information is available.",
-                    HttpStatusCode = StatusCodes.Status500InternalServerError
-                };
-                return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
+                return StatusCode(StatusCodes.Status500InternalServerError, UnexpectedError());
             }
         }
 
         [HttpPost]
         [Route("forecast")]
-        [ProducesResponseType(typeof(CurrentWeatherResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ForecastWeatherResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(DetailedErrorMessage), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(DetailedErrorMessage), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetForecastWeather(GetForecastWeatherRequest getForecastWeatherRequest)
+        public async Task<IActionResult> GetForecastWeather([FromBody] GetForecastWeatherRequest getForecastWeatherRequest)
         {
             try
             {
@@ -94,37 +77,33 @@ namespace ShowcaseProject.RestApi.Controllers
                     }
                     else
                     {
-                        var errorMessage = new DetailedErrorMessage
-                        {
-                            Message = "An error occurred while fetching forecast weather data.",
-                            Details = response.DetailedErrorMessage ?? "No additional information is available.",
-                            HttpStatusCode = StatusCodes.Status400BadRequest
-                        };
-                        return BadRequest(errorMessage);
+                        return BadRequest(ServiceError("An error occurred while fetching forecast weather data.", response.DetailedErrorMessage));
                     }
                 }
                 else
                 {
-                    var errorMessage = new DetailedErrorMessage
-                    {
-                        Message = "Invalid request model.",
-                        Details = "The provided request did not pass validation.",
-                        HttpStatusCode = StatusCodes.Status400BadRequest
-                    };
-                    return BadRequest(errorMessage);
+                    return BadRequest(ServiceError("Invalid request model.", "The provided request did not pass validation."));
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while fetching forecast weather data");
-                var errorMessage = new DetailedErrorMessage
-                {
-                    Message = "An unexpected error occurred while processing the request.",
-                    Details = "No additional information is available.",
-                    HttpStatusCode = StatusCodes.Status500InternalServerError
-                };
-                return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
+                return StatusCode(StatusCodes.Status500InternalServerError, UnexpectedError());
             }
         }
+
+        private static DetailedErrorMessage ServiceError(string message, string? details) => new()
+        {
+            Message = message,
+            Details = details ?? "No additional information is available.",
+            HttpStatusCode = StatusCodes.Status400BadRequest
+        };
+
+        private static DetailedErrorMessage UnexpectedError() => new()
+        {
+            Message = "An unexpected error occurred while processing the request.",
+            Details = "No additional information is available.",
+            HttpStatusCode = StatusCodes.Status500InternalServerError
+        };
     }
 }

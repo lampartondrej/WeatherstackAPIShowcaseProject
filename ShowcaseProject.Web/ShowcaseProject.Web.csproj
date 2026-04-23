@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="ShowcaseProject.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ShowcaseProject.Shared\ShowcaseProject.Shared.Model.csproj" />
   </ItemGroup>
 
