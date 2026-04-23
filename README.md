@@ -1,6 +1,6 @@
 # Weatherstack API Showcase Project
 
-> ⚠️ **Note:** This project was previously named *PrezentacniProjekt*.
+> ⚠️ **Note:** This project was previously named *PrezentacniProjekt*.  
 > Any remaining references to the old name are considered deprecated.
 
 ## 📌 Overview
@@ -36,68 +36,3 @@ The solution consists of:
 ```bash
 git clone https://github.com/lampartondrej/WeatherstackAPIShowcaseProject.git
 cd WeatherstackAPIShowcaseProject
-```
-
-2. Configure environment variables:
-
-* `WeatherApiKey`
-* `ShowcaseProjectApiUsername`
-* `ShowcaseProjectApiPassword`
-
-3. Run the REST API:
-
-```bash
-dotnet run --project ShowcaseProject.Rest
-```
-
-4. (Optional) Run MVC frontend:
-
-```bash
-dotnet run --project ShowcaseProject.Web
-```
-
-5. Open Swagger UI after startup to test the REST API endpoints.
-
-## 🔐 Authentication
-
-The API uses **Basic Authentication**.
-
-Credentials must be provided via environment variables:
-
-* `ShowcaseProjectApiUsername`
-* `ShowcaseProjectApiPassword`
-
-Authenticated requests must include the `Authorization` header in Basic Auth format.
-
-## 🧪 Testing
-
-Run all tests:
-
-```bash
-dotnet test
-```
-
-The test project validates the main application flow and selected backend behaviors.
-
-## 📸 Screenshots
-
-### Current Weather View
-
-![Current](./docs/screenshots/current.png)
-
-### Forecast View
-
-![Forecast](./docs/screenshots/forecast.png)
-
-### Swagger
-
-![Swagger](./docs/screenshots/swagger.png)
-
-> Note: depending on the external provider plan, forecast support may be limited.
-> In this project, the architecture and endpoint flow are implemented regardless of provider-tier constraints.
-
-## 📎 Notes
-
-* This project is intended for demonstration purposes and as a portfolio showcase.
-* It is not intended to be treated as a production-ready system.
-* The main goal is to demonstrate backend-oriented development practices in a small but complete .NET solution.
