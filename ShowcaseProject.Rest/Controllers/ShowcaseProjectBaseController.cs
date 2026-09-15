@@ -5,24 +5,14 @@ namespace ShowcaseProject.Controllers
 {
     /// <summary>
     /// Base controller for the Showcase Project API.
-    /// Provides common functionality and enforces authentication for all derived controllers.
+    /// Applies the shared routing convention and enforces authentication for all derived controllers.
+    /// Abstract so it is not itself discovered as a routable controller.
     /// </summary>
     [ApiController]
     [Route("[controller]")]
     [Authorize] // Require authentication for all actions
-    public class ShowcaseProjectBaseController : ControllerBase
+    public abstract class ShowcaseProjectBaseController : ControllerBase
     {
-        /// <summary>
-        /// Logger instance for logging operations within the controller.
-        /// </summary>
-        private readonly ILogger _logger;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ShowcaseProjectBaseController"/> class.
-        /// </summary>
-        /// <param name="logger">The logger instance for logging operations.</param>
-        public ShowcaseProjectBaseController(ILogger logger)
-        {
             _logger = logger;
         }
     }

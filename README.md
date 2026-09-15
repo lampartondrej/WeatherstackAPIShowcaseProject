@@ -19,6 +19,7 @@ The solution consists of:
 * REST API built with ASP.NET Core
 * MVC frontend for manual testing / presentation
 * Basic Authentication
+* Rate limiting (fixed window, per client)
 * Resilience using Polly
 * In-memory caching
 * Swagger (OpenAPI)
@@ -37,9 +38,13 @@ cd WeatherstackAPIShowcaseProject
 
 2. Configure environment variables:
 
-* `WeatherApiKey`
-* `ShowcaseProjectApiUsername`
-* `ShowcaseProjectApiPassword`
+* `WeatherstackApiKey`
+* `ShowcaseProject_ApiUsername`
+* `ShowcaseProject_ApiPassword`
+
+> The variable *names* are themselves configurable in `appsettings.json`
+> (`APIOptions:WeatherstackApiKeyEnvVar`, `AuthSettings:UsernameEnvVar`, `AuthSettings:PasswordEnvVar`).
+> On Windows, set them with `setx` and restart the terminal / IDE so the new process picks them up.
 
 3. Run the REST API:
 
@@ -61,10 +66,12 @@ The API uses **Basic Authentication**.
 
 Credentials must be provided via environment variables:
 
-* `ShowcaseProjectApiUsername`
-* `ShowcaseProjectApiPassword`
+* `ShowcaseProject_ApiUsername`
+* `ShowcaseProject_ApiPassword`
 
 Authenticated requests must include the `Authorization` header in Basic Auth format.
+Credentials are compared in constant time, and requests are rate limited before authentication
+runs, so repeated failed sign-in attempts are throttled per client.
 
 ## 🧪 Testing
 

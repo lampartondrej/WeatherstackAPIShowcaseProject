@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
+using ShowcaseProject.Web.Authentication;
 
 namespace ShowcaseProject.Web
 {
@@ -12,12 +13,17 @@ namespace ShowcaseProject.Web
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            // API credentials are resolved once at startup so misconfiguration fails fast.
+            builder.Services.AddSingleton(ApiCredentials.FromConfiguration(builder.Configuration));
+            builder.Services.AddTransient<BasicAuthenticationHeaderHandler>();
+
             // Add HttpClient for API calls with retry and circuit-breaker resilience
             builder.Services.AddHttpClient("WeatherApi", client =>
             {
                 client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7001");
                 client.Timeout = TimeSpan.FromSeconds(30);
             })
+            .AddHttpMessageHandler<BasicAuthenticationHeaderHandler>()
             .AddResilienceHandler("weather-resilience", pipeline =>
             {
                 // Retry up to 3 times with exponential back-off for transient errors

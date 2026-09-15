@@ -1,6 +1,12 @@
 /* ?? Phone layout (? 600px) ??????????????????????????????????? */
 @media (max-width: 600px) {
 
+    /* Tighter gutter on phones, still shared by the navbar and the panel */
+    :root {
+        --panel-width: calc(100% - 24px);
+        --panel-max-width: none;
+    }
+
     /* Let the page scroll naturally instead of the absolute-centred panel */
     #dynamic-body {
         display: flex;
@@ -11,30 +17,42 @@
         box-sizing: border-box;
     }
 
+    /* The body is a centring flex column, which would otherwise shrink <main> to its
+       content width and make the panel narrower than the navbar. */
+    main {
+        width: 100%;
+    }
+
     /* Unpin the glass panel from absolute centre */
     .glass-panel {
         position: relative;
         top: unset;
         left: unset;
         transform: none;
-        width: calc(100% - 24px);
-        max-width: 100%;
+        width: var(--panel-width);
+        max-width: var(--panel-max-width);
         min-height: unset;
         padding: 20px 16px;
         border-radius: 16px;
     }
 
-    /* Navbar: full-width pill pinned to top */
+    /* Navbar: full-width pill pinned to top. Flex instead of the desktop grid so the
+       tabs can use the space an empty centring column would otherwise waste. */
     .glass-navbar {
         top: 10px;
-        left: 12px;
-        right: 12px;
-        transform: none;
-        width: calc(100% - 24px);
+        display: flex;
         justify-content: space-between;
         padding: 8px 14px;
         border-radius: 14px;
-        box-sizing: border-box;
+    }
+
+    .nav-group--tabs {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .nav-group--actions {
+        flex: none;
     }
 
     .nav-tab {
@@ -84,7 +102,7 @@
         font-size: 1.1rem;
     }
 
-    /* Detail cards — 2-column grid, thumb-friendly tap targets */
+    /* Detail cards ï¿½ 2-column grid, thumb-friendly tap targets */
     .weather-details-left,
     .weather-details-right {
         display: grid;
@@ -112,7 +130,7 @@
         font-size: 0.95rem;
     }
 
-    /* Forecast strip — horizontal scroll with snap for native swipe feel */
+    /* Forecast strip ï¿½ horizontal scroll with snap for native swipe feel */
     .forecast-days {
         display: flex;
         flex-wrap: nowrap;

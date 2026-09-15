@@ -24,13 +24,17 @@
     </div>
 
     <nav class="glass-navbar">
-        <a href="/" class="nav-tab active" data-tab="current">Current Weather</a>
-        <a href="/" class="nav-tab" data-tab="forecast">Weather Forecast</a>
-        <div class="nav-divider"></div>
-        <button id="change-location-btn" class="nav-location-btn" title="Change Location">
-            <span class="location-icon">📍</span>
-            <span id="current-location-display" class="location-text">Loading...</span>
-        </button>
+        <div class="nav-group nav-group--tabs">
+            <a href="/" class="nav-tab active" data-tab="current">Current Weather</a>
+            <a href="/" class="nav-tab" data-tab="forecast">Weather Forecast</a>
+        </div>
+        <div class="nav-group nav-group--actions">
+            <div class="nav-divider"></div>
+            <button id="change-location-btn" class="nav-location-btn" title="Change Location">
+                <span class="location-icon">📍</span>
+                <span id="current-location-display" class="location-text">Loading...</span>
+            </button>
+        </div>
     </nav>
 
     <main role="main">

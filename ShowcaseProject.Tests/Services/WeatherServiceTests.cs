@@ -979,6 +979,168 @@ namespace ShowcaseProject.Tests.Services
 
         #endregion
 
+        #region Provider Error Payload Tests
+
+        // Weatherstack answers with HTTP 200 even when the request failed, so these tests
+        // guard the only signal that distinguishes a real result from a provider error.
+        private const string RequestFailedPayload =
+            """{"success":false,"error":{"code":615,"type":"request_failed","info":"Your API request failed."}}""";
+
+        private const string InvalidAccessKeyPayload =
+            """{"success":false,"error":{"code":101,"type":"invalid_access_key","info":"You have not supplied a valid API Access Key."}}""";
+
+        [Fact]
+        public async Task GetCurrentWeather_WhenProviderReturnsRequestFailed_ReturnsInvalidRequestFailure()
+        {
+            // Arrange
+            var httpClient = CreateMockHttpClient(HttpStatusCode.OK, RequestFailedPayload);
+            _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var service = CreateWeatherService();
+
+            // Act
+            var result = await service.GetCurrentWeather(new GetCurrentWeatherRequest { Location = "NotACity" });
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Null(result.Data);
+            Assert.Equal(ServiceErrorKind.InvalidRequest, result.ErrorKind);
+            Assert.Contains("615", result.DetailedErrorMessage);
+        }
+
+        [Fact]
+        public async Task GetCurrentWeather_WhenProviderReturnsInvalidAccessKey_ReturnsUpstreamErrorFailure()
+        {
+            // Arrange
+            var httpClient = CreateMockHttpClient(HttpStatusCode.OK, InvalidAccessKeyPayload);
+            _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var service = CreateWeatherService();
+
+            // Act
+            var result = await service.GetCurrentWeather(new GetCurrentWeatherRequest { Location = "Prague" });
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ServiceErrorKind.UpstreamError, result.ErrorKind);
+            Assert.Contains("invalid_access_key", result.DetailedErrorMessage);
+        }
+
+        [Fact]
+        public async Task GetCurrentWeather_WhenProviderReturnsErrorPayload_DoesNotCacheResult()
+        {
+            // Arrange
+            var httpClient = CreateMockHttpClient(HttpStatusCode.OK, RequestFailedPayload);
+            _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var service = CreateWeatherService();
+
+            // Act
+            var result = await service.GetCurrentWeather(new GetCurrentWeatherRequest { Location = "NotACity" });
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            _mockMemoryCache.Verify(x => x.CreateEntry(It.IsAny<object>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task GetCurrentWeather_WhenPayloadIsIncomplete_ReturnsUpstreamErrorFailure()
+        {
+            // Arrange - HTTP 200 with no error flag but also no usable weather data
+            var httpClient = CreateMockHttpClient(HttpStatusCode.OK, "{}");
+            _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var service = CreateWeatherService();
+
+            // Act
+            var result = await service.GetCurrentWeather(new GetCurrentWeatherRequest { Location = "Prague" });
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Null(result.Data);
+            Assert.Equal(ServiceErrorKind.UpstreamError, result.ErrorKind);
+            _mockMemoryCache.Verify(x => x.CreateEntry(It.IsAny<object>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task GetForecastWeather_WhenProviderReturnsRequestFailed_ReturnsInvalidRequestFailure()
+        {
+            // Arrange
+            var httpClient = CreateMockHttpClient(HttpStatusCode.OK, RequestFailedPayload);
+            _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var service = CreateWeatherService();
+
+            // Act
+            var result = await service.GetForecastWeather(new GetForecastWeatherRequest { Location = "NotACity" });
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ServiceErrorKind.InvalidRequest, result.ErrorKind);
+            _mockMemoryCache.Verify(x => x.CreateEntry(It.IsAny<object>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task GetCurrentWeather_WhenProviderIsUnreachable_ReturnsUpstreamUnavailableFailure()
+        {
+            // Arrange
+            _mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ThrowsAsync(new HttpRequestException("Network error"));
+
+            _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(new HttpClient(_mockHttpMessageHandler.Object));
+
+            var service = CreateWeatherService();
+
+            // Act
+            var result = await service.GetCurrentWeather(new GetCurrentWeatherRequest { Location = "Prague" });
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ServiceErrorKind.UpstreamUnavailable, result.ErrorKind);
+        }
+
+        [Fact]
+        public async Task GetCurrentWeather_WhenProviderThrottlesTheCall_ReturnsUpstreamUnavailableFailure()
+        {
+            // Arrange - the provider's own quota/throttling response is transient, not a permanent error
+            var httpClient = CreateMockHttpClient(HttpStatusCode.TooManyRequests, "");
+            _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var service = CreateWeatherService();
+
+            // Act
+            var result = await service.GetCurrentWeather(new GetCurrentWeatherRequest { Location = "Prague" });
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ServiceErrorKind.UpstreamUnavailable, result.ErrorKind);
+            _mockMemoryCache.Verify(x => x.CreateEntry(It.IsAny<object>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task GetCurrentWeather_WhenProviderReturnsErrorStatusCode_ReturnsUpstreamErrorFailure()
+        {
+            // Arrange
+            var httpClient = CreateMockHttpClient(HttpStatusCode.InternalServerError, "");
+            _mockHttpClientFactory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var service = CreateWeatherService();
+
+            // Act
+            var result = await service.GetCurrentWeather(new GetCurrentWeatherRequest { Location = "Prague" });
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ServiceErrorKind.UpstreamError, result.ErrorKind);
+        }
+
+        #endregion
+
         private WeatherService CreateWeatherService(IConfiguration? config = null)
         {
             var requestBuilder = new BuildUriStringForWeatherstack();

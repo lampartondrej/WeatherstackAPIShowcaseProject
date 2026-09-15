@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- XML docs drive the Swagger schema descriptions; undocumented members are not an error. -->
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
 </Project>
