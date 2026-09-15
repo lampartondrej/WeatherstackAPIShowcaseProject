@@ -13,7 +13,5 @@ namespace ShowcaseProject.Controllers
     [Authorize] // Require authentication for all actions
     public abstract class ShowcaseProjectBaseController : ControllerBase
     {
-            _logger = logger;
-        }
     }
 }
