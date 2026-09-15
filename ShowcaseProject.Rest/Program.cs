@@ -4,6 +4,8 @@ using Polly.Extensions.Http;
 using Serilog;
 using Serilog.Sinks.MSSqlServer;
 using ShowcaseProject.RestApi.CustomHelpers;
+using ShowcaseProject.RestApi.RateLimiting;
+using ShowcaseProject.RestApi.Swagger;
 using ShowcaseProject.Services;
 using ShowcaseProject.Services.Interfaces;
 
@@ -48,6 +50,8 @@ namespace ShowcaseProject
 
                 builder.Services.AddAuthorization();
 
+                builder.Services.AddShowcaseRateLimiting(builder.Configuration);
+
                 //register services
                 builder.Services.AddHttpClient("WeatherServiceClient")
                     .AddPolicyHandler((serviceProvider, request) =>
@@ -76,33 +80,8 @@ namespace ShowcaseProject
                 builder.Services.AddScoped<IWeatherstackRequestBuilder, BuildUriStringForWeatherstack>();
                 builder.Services.AddScoped<IWeatherService, WeatherService>();
 
-                // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-                builder.Services.AddEndpointsApiExplorer();
-                builder.Services.AddSwaggerGen(options =>
-                {
-                    options.AddSecurityDefinition("basic", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-                    {
-                        Name = "Authorization",
-                        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-                        Scheme = "basic",
-                        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                        Description = "Basic authentication. Provide credentials in the format: Basic <base64(username:password)>."
-                    });
-                    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-                    {
-                        {
-                            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-                            {
-                                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                                {
-                                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                                    Id = "basic"
-                                }
-                            },
-                            new string[] {}
-                        }
-                    });
-                });
+                // Swagger/OpenAPI, including the API "About" page and XML based endpoint documentation.
+                builder.Services.AddShowcaseSwagger();
 
                 var app = builder.Build();
 
@@ -114,14 +93,28 @@ namespace ShowcaseProject
                 // API exploration by internal consumers and the integration test suite.
                 // Restrict access via network/auth policy if needed in production.
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(options =>
+                {
+                    options.DocumentTitle = "Weatherstack Showcase API";
+                    options.DisplayRequestDuration();
+                });
+
+                if (!app.Environment.IsDevelopment())
+                {
+                    app.UseHsts();
+                }
 
                 app.UseHttpsRedirection();
+
+                app.UseRouting();
+
+                // Rate limiting runs before authentication so repeated failed sign-in attempts are throttled.
+                app.UseRateLimiter();
 
                 app.UseAuthentication();
                 app.UseAuthorization();
 
-                app.MapControllers();
+                app.MapControllers().RequireRateLimiting(RateLimitingExtensions.PerClientPolicy);
 
                 app.MapHealthChecks("/health");
 

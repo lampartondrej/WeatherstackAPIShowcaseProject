@@ -11,6 +11,7 @@ using System.Text.Json;
 
 namespace ShowcaseProject.Tests.Integration
 {
+    [Collection(IntegrationTestCollection.Name)]
     public class WeatherControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>
     {
         private readonly CustomWebApplicationFactory _factory;
@@ -74,7 +75,8 @@ namespace ShowcaseProject.Tests.Integration
                 {
                     IsSuccess = false,
                     Data = null,
-                    DetailedErrorMessage = "Invalid location"
+                    DetailedErrorMessage = "Invalid location",
+                    ErrorKind = ServiceErrorKind.InvalidRequest
                 });
 
             var request = new GetCurrentWeatherRequest { Location = "InvalidCity" };
@@ -84,6 +86,29 @@ namespace ShowcaseProject.Tests.Integration
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetCurrentWeather_WhenProviderUnavailable_ReturnsServiceUnavailable()
+        {
+            // Arrange
+            _factory.MockWeatherService!
+                .Setup(x => x.GetCurrentWeather(It.IsAny<GetCurrentWeatherRequest>()))
+                .ReturnsAsync(new ServiceWrapper<CurrentWeatherResponse>
+                {
+                    IsSuccess = false,
+                    Data = null,
+                    DetailedErrorMessage = "An error occurred while fetching current weather data.",
+                    ErrorKind = ServiceErrorKind.UpstreamUnavailable
+                });
+
+            var request = new GetCurrentWeatherRequest { Location = "Prague" };
+
+            // Act
+            var response = await _client.PostAsJsonAsync("/Weather/current", request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
         }
 
         [Fact]
@@ -191,7 +216,7 @@ namespace ShowcaseProject.Tests.Integration
         }
 
         [Fact]
-        public async Task GetForecastWeather_WithServiceFailure_ReturnsBadRequest()
+        public async Task GetForecastWeather_WithUpstreamError_ReturnsBadGateway()
         {
             // Arrange
             _factory.MockWeatherService!
@@ -200,7 +225,8 @@ namespace ShowcaseProject.Tests.Integration
                 {
                     IsSuccess = false,
                     Data = null,
-                    DetailedErrorMessage = "API error"
+                    DetailedErrorMessage = "Weatherstack error 101 (invalid_access_key): invalid key",
+                    ErrorKind = ServiceErrorKind.UpstreamError
                 });
 
             var request = new GetForecastWeatherRequest { Location = "Paris" };
@@ -209,7 +235,7 @@ namespace ShowcaseProject.Tests.Integration
             var response = await _client.PostAsJsonAsync("/Weather/forecast", request);
 
             // Assert
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.BadGateway, response.StatusCode);
         }
 
         [Fact]

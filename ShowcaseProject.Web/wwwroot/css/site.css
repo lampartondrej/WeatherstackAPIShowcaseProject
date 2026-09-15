@@ -1,3 +1,12 @@
+/* Single source of truth for the panel width. The navbar and the main panel both
+   size from these, so their edges stay aligned in every layout. Values are relative
+   to the viewport in both cases: the navbar is fixed, and the main panel's container
+   is never given horizontal padding, so percentages resolve against the same width. */
+:root {
+    --panel-width: 80%;
+    --panel-max-width: 1200px;
+}
+
 html {
   font-size: 14px;
 }
@@ -40,7 +49,10 @@ body {
 }
 
 .night {
-    background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(15, 16, 33, 1) 37%);
+    /* Overlay layer lifts the top edge with a faint white haze and settles the bottom into black. */
+    background-image:
+        linear-gradient(to top, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0) 30%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.10) 100%),
+        linear-gradient(to top, #272b53, #282f56, #2a3458, #2c385b, #2e3c5d, #2e4360, #2f4962, #334f64, #3a5765, #465f66, #536668, #616d6c);
 }
 
 /* Glass panel - frosted/blurred see-through container */
@@ -49,8 +61,9 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 80%;
-    max-width: 1200px;
+    box-sizing: border-box;
+    width: var(--panel-width);
+    max-width: var(--panel-max-width);
     min-height: 600px;
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
@@ -67,7 +80,13 @@ body {
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    display: flex;
+    box-sizing: border-box;
+    width: var(--panel-width);
+    max-width: var(--panel-max-width);
+    /* Empty first column mirrors the actions column, so the tabs sit in the true centre. */
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
     gap: 10px;
     padding: 10px 20px;
     background: rgba(255, 255, 255, 0.15);
@@ -79,13 +98,30 @@ body {
     z-index: 1000;
 }
 
+/* Navbar groups: tabs centred in column 2, actions pinned to the right of column 3 */
+.nav-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.nav-group--tabs {
+    grid-column: 2;
+    justify-content: center;
+}
+
+.nav-group--actions {
+    grid-column: 3;
+    justify-self: end;
+}
+
 /* Navbar divider */
 .nav-divider {
     width: 1px;
     height: 24px;
     background: rgba(255, 255, 255, 0.3);
-    margin: 0 10px;
-    align-self: center;
+    flex: none;
 }
 
 /* Location button in navbar */
@@ -423,7 +459,7 @@ body {
     display: none;
 }
 
-/* Fully reset .glass-panel sizing – this card is small & self-contained */
+/* Fully reset .glass-panel sizing ï¿½ this card is small & self-contained */
 .fetch-overlay-panel {
     position: relative !important;
     top: unset !important;

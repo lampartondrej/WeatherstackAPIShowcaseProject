@@ -13,6 +13,12 @@ namespace ShowcaseProject.Tests.Integration
     {
         public Mock<IWeatherService>? MockWeatherService { get; private set; }
 
+        /// <summary>
+        /// Permit limit applied to the rate limiter. Deliberately high so ordinary tests
+        /// are never throttled; rate limiting itself is covered by a dedicated factory.
+        /// </summary>
+        protected virtual int RateLimitPermitLimit => 1000;
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.ConfigureAppConfiguration((context, config) =>
@@ -25,7 +31,9 @@ namespace ShowcaseProject.Tests.Integration
                     {"APIOptions:CurrentWeatherEndpoint", "current"},
                     {"APIOptions:ForecastWeatherEndpoint", "forecast"},
                     {"AuthSettings:UsernameEnvVar", "TestUsername"},
-                    {"AuthSettings:PasswordEnvVar", "TestPassword"}
+                    {"AuthSettings:PasswordEnvVar", "TestPassword"},
+                    {"RateLimiting:PermitLimit", RateLimitPermitLimit.ToString()},
+                    {"RateLimiting:WindowSeconds", "60"}
                 }!);
             });
 

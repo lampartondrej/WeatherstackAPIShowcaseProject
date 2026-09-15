@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Current.Request;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Current.Response;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Forecast.Request;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Forecast.Response;
-using System.Net.Http.Headers;
-using System.Text;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace ShowcaseProject.Web.Controllers
@@ -13,116 +12,62 @@ namespace ShowcaseProject.Web.Controllers
     [ApiController]
     public class WeatherApiController : ControllerBase
     {
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IConfiguration _configuration;
-        private readonly ILogger<WeatherApiController> _logger;
-        private readonly string _apiUsername;
-        private readonly string _apiPassword;
+        private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-        public WeatherApiController(
-            IHttpClientFactory httpClientFactory,
-            IConfiguration configuration,
-            ILogger<WeatherApiController> logger)
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger<WeatherApiController> _logger;
+
+        public WeatherApiController(IHttpClientFactory httpClientFactory, ILogger<WeatherApiController> logger)
         {
             _httpClientFactory = httpClientFactory;
-            _configuration = configuration;
             _logger = logger;
-
-            // Get environment variable names from configuration
-            var usernameEnvVar = _configuration.GetValue<string>("AuthSettings:UsernameEnvVar")
-                ?? throw new InvalidOperationException("AuthSettings:UsernameEnvVar is not set in configuration.");
-            var passwordEnvVar = _configuration.GetValue<string>("AuthSettings:PasswordEnvVar")
-                ?? throw new InvalidOperationException("AuthSettings:PasswordEnvVar is not set in configuration.");
-
-            // Get actual credentials from environment variables
-            _apiUsername = Environment.GetEnvironmentVariable(usernameEnvVar)
-                ?? throw new InvalidOperationException($"Environment variable '{usernameEnvVar}' is not set.");
-            _apiPassword = Environment.GetEnvironmentVariable(passwordEnvVar)
-                ?? throw new InvalidOperationException($"Environment variable '{passwordEnvVar}' is not set.");
         }
 
         [HttpGet("current/{location}")]
-        public async Task<IActionResult> GetCurrentWeather(string location)
+        public Task<IActionResult> GetCurrentWeather(string location)
         {
-            try
-            {
-                var client = _httpClientFactory.CreateClient("WeatherApi");
-                
-                // Add Basic Authentication using credentials from environment variables
-                var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_apiUsername}:{_apiPassword}"));
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
-
-                var request = new GetCurrentWeatherRequest { Location = location };
-                var content = new StringContent(
-                    JsonSerializer.Serialize(request),
-                    Encoding.UTF8,
-                    "application/json");
-
-                var response = await client.PostAsync("/Weather/current", content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var weatherData = JsonSerializer.Deserialize<CurrentWeatherResponse>(responseContent, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-                    return Ok(weatherData);
-                }
-                else
-                {
-                    _logger.LogError("Failed to fetch current weather. Status: {StatusCode}", response.StatusCode);
-                    return StatusCode((int)response.StatusCode, "Failed to fetch weather data");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching current weather for location: {Location}", location);
-                return StatusCode(500, "An error occurred while fetching weather data");
-            }
+            return ForwardToApiAsync<GetCurrentWeatherRequest, CurrentWeatherResponse>(
+                "/Weather/current",
+                new GetCurrentWeatherRequest { Location = location },
+                location,
+                "current weather");
         }
 
         [HttpGet("forecast/{location}")]
-        public async Task<IActionResult> GetForecastWeather(string location)
+        public Task<IActionResult> GetForecastWeather(string location)
+        {
+            return ForwardToApiAsync<GetForecastWeatherRequest, ForecastWeatherResponse>(
+                "/Weather/forecast",
+                new GetForecastWeatherRequest { Location = location },
+                location,
+                "forecast weather");
+        }
+
+        private async Task<IActionResult> ForwardToApiAsync<TRequest, TResponse>(
+            string endpoint,
+            TRequest request,
+            string location,
+            string dataDescription)
         {
             try
             {
+                // Authorization is attached by BasicAuthenticationHeaderHandler on the named client.
                 var client = _httpClientFactory.CreateClient("WeatherApi");
-                
-                // Add Basic Authentication using credentials from environment variables
-                var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_apiUsername}:{_apiPassword}"));
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
+                var response = await client.PostAsJsonAsync(endpoint, request);
 
-                var request = new GetForecastWeatherRequest 
-                { 
-                    Location = location
-                };
-                var content = new StringContent(
-                    JsonSerializer.Serialize(request),
-                    Encoding.UTF8,
-                    "application/json");
-
-                var response = await client.PostAsync("/Weather/forecast", content);
-
-                if (response.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode)
                 {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var weatherData = JsonSerializer.Deserialize<ForecastWeatherResponse>(responseContent, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-                    return Ok(weatherData);
+                    _logger.LogError("Failed to fetch {DataDescription}. Status: {StatusCode}", dataDescription, response.StatusCode);
+                    return StatusCode((int)response.StatusCode, $"Failed to fetch {dataDescription} data");
                 }
-                else
-                {
-                    _logger.LogError("Failed to fetch forecast weather. Status: {StatusCode}", response.StatusCode);
-                    return StatusCode((int)response.StatusCode, "Failed to fetch forecast data");
-                }
+
+                var weatherData = await response.Content.ReadFromJsonAsync<TResponse>(JsonOptions);
+                return Ok(weatherData);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching forecast weather for location: {Location}", location);
-                return StatusCode(500, "An error occurred while fetching forecast data");
+                _logger.LogError(ex, "Error fetching {DataDescription} for location: {Location}", dataDescription, location);
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while fetching {dataDescription} data");
             }
         }
     }

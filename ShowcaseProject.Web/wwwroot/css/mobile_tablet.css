@@ -1,10 +1,17 @@
 /* ?? Tablet layout (? 992px) ?????????????????????????????????? */
 @media (max-width: 992px) {
 
-    /* Unpin the absolute-centred body — use padding to clear the fixed navbar */
+    /* Narrower panel with a 24px gutter, shared by the navbar */
+    :root {
+        --panel-width: calc(100% - 48px);
+        --panel-max-width: 900px;
+    }
+
+    /* Unpin the absolute-centred body. The side gutter comes from --panel-width,
+       not from body padding, so the panel and the fixed navbar measure the same width. */
     #dynamic-body {
         min-height: 100vh;
-        padding: 120px 24px 40px;
+        padding: 120px 0 40px;
         box-sizing: border-box;
     }
 
@@ -14,13 +21,13 @@
         top: unset;
         left: unset;
         transform: none;
-        width: 100%;
-        max-width: 900px;
+        width: var(--panel-width);
+        max-width: var(--panel-max-width);
         min-height: unset;
         margin: 0 auto;
     }
 
-    /* Explicit grid areas — no ordering ambiguity */
+    /* Explicit grid areas ï¿½ no ordering ambiguity */
     .weather-layout {
         display: grid;
         grid-template-columns: 1fr 1fr;

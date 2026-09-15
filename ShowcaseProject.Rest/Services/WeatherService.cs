@@ -1,23 +1,23 @@
-﻿using ShowcaseProject.RestApi.CustomHelpers;
 using Microsoft.Extensions.Caching.Memory;
+using ShowcaseProject.RestApi.CustomHelpers;
 using ShowcaseProject.Services.Interfaces;
-using ShowcaseProject.Shared.Model.DTOs.Shared;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Current.Request;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Current.Response;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Forecast.Request;
 using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Forecast.Response;
+using ShowcaseProject.Shared.Model.DTOs.Weatherstack.Shared;
 using ShowcaseProject.Shared.Model.Wrapper;
-using ShowcaseProject.RestApi.Services;
+using System.Net;
+using System.Text.Json;
 
 namespace ShowcaseProject.Services
 {
     /// <summary>
     /// Service implementation for retrieving weather information from the Weatherstack API.
     /// </summary>
-    public class WeatherService : ShowcaseProjectBaseService, IWeatherService
+    public class WeatherService : IWeatherService
     {
         private readonly ILogger<WeatherService> _logger;
-        private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IMemoryCache _memoryCache;
         private readonly IWeatherstackRequestBuilder _requestBuilder;
@@ -32,31 +32,41 @@ namespace ShowcaseProject.Services
             IConfiguration configuration,
             IHttpClientFactory httpClientFactory,
             IMemoryCache memoryCache,
-            IWeatherstackRequestBuilder requestBuilder) : base(logger, configuration, httpClientFactory)
+            IWeatherstackRequestBuilder requestBuilder)
         {
             _logger = logger;
-            _configuration = configuration;
             _httpClientFactory = httpClientFactory;
             _memoryCache = memoryCache;
             _requestBuilder = requestBuilder;
-            WeatherstackApiKeyEnvVar = _configuration.GetValue<string>("APIOptions:WeatherstackApiKeyEnvVar") ?? throw new InvalidOperationException("Weather API key environment variable name is not set in configuration.");
+            WeatherstackApiKeyEnvVar = configuration.GetValue<string>("APIOptions:WeatherstackApiKeyEnvVar") ?? throw new InvalidOperationException("Weather API key environment variable name is not set in configuration.");
             WeatherApiKey = Environment.GetEnvironmentVariable($"{WeatherstackApiKeyEnvVar}") ?? throw new InvalidOperationException($"Weather API key is not set in environment variable '{WeatherstackApiKeyEnvVar}'.");
-            WeatherApiBaseUrl = _configuration.GetValue<string>("APIOptions:WeatherstackApiUrl") ?? throw new InvalidOperationException("Weather API base URL is not set in configuration.");
-            CurrentWeatherEndpoint = _configuration.GetValue<string>("APIOptions:CurrentWeatherEndpoint") ?? throw new InvalidOperationException("Current weather endpoint is not set in configuration.");
-            ForecastWeatherEndpoint = _configuration.GetValue<string>("APIOptions:ForecastWeatherEndpoint") ?? throw new InvalidOperationException("Forecast weather endpoint is not set in configuration.");
-
+            WeatherApiBaseUrl = configuration.GetValue<string>("APIOptions:WeatherstackApiUrl") ?? throw new InvalidOperationException("Weather API base URL is not set in configuration.");
+            CurrentWeatherEndpoint = configuration.GetValue<string>("APIOptions:CurrentWeatherEndpoint") ?? throw new InvalidOperationException("Current weather endpoint is not set in configuration.");
+            ForecastWeatherEndpoint = configuration.GetValue<string>("APIOptions:ForecastWeatherEndpoint") ?? throw new InvalidOperationException("Forecast weather endpoint is not set in configuration.");
         }
+
         #region public methods
-        public async Task<ServiceWrapper<CurrentWeatherResponse>> GetCurrentWeather(GetCurrentWeatherRequest currentWeatherRequest)
+        public Task<ServiceWrapper<CurrentWeatherResponse>> GetCurrentWeather(GetCurrentWeatherRequest currentWeatherRequest)
         {
-            return await GetCurrentWeatherAsync(currentWeatherRequest);
+            return GetWeatherAsync<CurrentWeatherResponse>(
+                cacheKey: BuildCurrentWeatherCacheKey(currentWeatherRequest),
+                endpoint: CurrentWeatherEndpoint,
+                buildQuery: () => _requestBuilder.BuildQueryForCurrentWeather(currentWeatherRequest),
+                location: currentWeatherRequest.Location,
+                dataDescription: "current weather data");
         }
 
-        public async Task<ServiceWrapper<ForecastWeatherResponse>> GetForecastWeather(GetForecastWeatherRequest forecastWeatherRequest)
+        public Task<ServiceWrapper<ForecastWeatherResponse>> GetForecastWeather(GetForecastWeatherRequest forecastWeatherRequest)
         {
-            return await GetForecastWeatherAsync(forecastWeatherRequest);
+            return GetWeatherAsync<ForecastWeatherResponse>(
+                cacheKey: BuildForecastWeatherCacheKey(forecastWeatherRequest),
+                endpoint: ForecastWeatherEndpoint,
+                buildQuery: () => _requestBuilder.BuildQueryForForecastWeather(forecastWeatherRequest),
+                location: forecastWeatherRequest.Location,
+                dataDescription: "forecast weather data");
         }
         #endregion
+
         #region private methods
         private static string BuildCurrentWeatherCacheKey(GetCurrentWeatherRequest r)
             => $"current|{r.Location}|{r.units}|{r.language}|{r.callback}";
@@ -64,128 +74,120 @@ namespace ShowcaseProject.Services
         private static string BuildForecastWeatherCacheKey(GetForecastWeatherRequest r)
             => $"forecast|{r.Location}|{r.forecastDays}|{r.hourly}|{r.interval}|{r.units}|{r.language}|{r.callback}";
 
-        private async Task<ServiceWrapper<CurrentWeatherResponse>> GetCurrentWeatherAsync(GetCurrentWeatherRequest currentWeatherRequest)
+        private async Task<ServiceWrapper<T>> GetWeatherAsync<T>(
+            string cacheKey,
+            string endpoint,
+            Func<string> buildQuery,
+            string location,
+            string dataDescription) where T : class, IWeatherstackResponse
         {
-            var cacheKey = BuildCurrentWeatherCacheKey(currentWeatherRequest);
-
-            if (_memoryCache.TryGetValue(cacheKey, out ServiceWrapper<CurrentWeatherResponse>? cachedResponse) && cachedResponse != null)
+            if (_memoryCache.TryGetValue(cacheKey, out ServiceWrapper<T>? cachedResponse) && cachedResponse != null)
             {
-                _logger.LogInformation("Returning cached current weather data for location: {Location}", currentWeatherRequest.Location);
+                _logger.LogInformation("Returning cached {DataDescription} for location: {Location}", dataDescription, location);
                 return cachedResponse;
             }
 
             try
             {
-                using var httpClient = _httpClientFactory.CreateClient("WeatherServiceClient");
-                var queryString = _requestBuilder.BuildQueryForCurrentWeather(currentWeatherRequest);
-                var requestUrl = $"{WeatherApiBaseUrl}/{CurrentWeatherEndpoint}?access_key={WeatherApiKey}&query={queryString}";
+                var httpClient = _httpClientFactory.CreateClient("WeatherServiceClient");
+                var requestUrl = $"{WeatherApiBaseUrl}/{endpoint}?access_key={WeatherApiKey}&query={buildQuery()}";
 
-                _logger.LogInformation("Requested current weather data for location: {Location}", currentWeatherRequest.Location);
+                _logger.LogInformation("Requested {DataDescription} for location: {Location}", dataDescription, location);
                 var response = await httpClient.GetAsync(requestUrl);
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var weatherResponse = System.Text.Json.JsonSerializer.Deserialize<CurrentWeatherResponse>(content);
-                    _logger.LogInformation("Successfully fetched current weather data for location: {Location}", currentWeatherRequest.Location);
-                    var result = new ServiceWrapper<CurrentWeatherResponse>
-                    {
-                        IsSuccess = true,
-                        Data = weatherResponse,
-                        DetailedErrorMessage = null
-                    };
 
-                    if (weatherResponse != null)
-                    {
-                        _memoryCache.Set(cacheKey, result, CacheDuration);
-                        _logger.LogInformation("Cached current weather data for location: {Location} for {CacheDuration} minutes", currentWeatherRequest.Location, CacheDuration.TotalMinutes);
-                    }
-
-                    return result;
-                }
-                else
+                if (!response.IsSuccessStatusCode)
                 {
-                    var errorMessage = $"Weatherstack API returned status code {response.StatusCode}";
-                    return new ServiceWrapper<CurrentWeatherResponse>
-                    {
-                        IsSuccess = false,
-                        Data = null,
-                        DetailedErrorMessage = errorMessage
-                    };
+                    return Failure<T>(MapStatusCodeErrorKind(response.StatusCode), $"Weatherstack API returned status code {response.StatusCode}");
                 }
 
+                var content = await response.Content.ReadAsStringAsync();
+
+                T? weatherResponse;
+                try
+                {
+                    weatherResponse = JsonSerializer.Deserialize<T>(content);
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogError(ex, "Could not deserialize {DataDescription} for location: {Location}", dataDescription, location);
+                    return Failure<T>(ServiceErrorKind.UpstreamError, "The weather provider returned a response that could not be processed.");
+                }
+
+                // Weatherstack reports application-level failures (invalid key, unknown location,
+                // exhausted quota) with HTTP 200 and success:false, so the status code alone is not enough.
+                if (weatherResponse is null || weatherResponse.success == false || weatherResponse.error is not null)
+                {
+                    var providerError = weatherResponse?.error;
+                    _logger.LogWarning(
+                        "Weatherstack reported an error for location {Location}: {ErrorCode} {ErrorType} {ErrorInfo}",
+                        location, providerError?.code, providerError?.type, providerError?.info);
+
+                    return Failure<T>(MapProviderErrorKind(providerError?.code), BuildProviderErrorMessage(providerError));
+                }
+
+                if (!weatherResponse.HasUsablePayload)
+                {
+                    _logger.LogWarning("Weatherstack returned an incomplete payload for location: {Location}", location);
+                    return Failure<T>(ServiceErrorKind.UpstreamError, "The weather provider returned an incomplete response.");
+                }
+
+                _logger.LogInformation("Successfully fetched {DataDescription} for location: {Location}", dataDescription, location);
+
+                var result = new ServiceWrapper<T>
+                {
+                    IsSuccess = true,
+                    Data = weatherResponse,
+                    DetailedErrorMessage = null,
+                    ErrorKind = ServiceErrorKind.None
+                };
+
+                _memoryCache.Set(cacheKey, result, CacheDuration);
+                _logger.LogInformation("Cached {DataDescription} for location: {Location} for {CacheDuration} minutes", dataDescription, location, CacheDuration.TotalMinutes);
+
+                return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while fetching current weather data");
-                return new ServiceWrapper<CurrentWeatherResponse>
-                {
-                    IsSuccess = false,
-                    Data = null,
-                    DetailedErrorMessage = "An error occurred while fetching current weather data."
-                };
+                _logger.LogError(ex, "An error occurred while fetching {DataDescription}", dataDescription);
+                return Failure<T>(ServiceErrorKind.UpstreamUnavailable, $"An error occurred while fetching {dataDescription}.");
             }
         }
 
-        private async Task<ServiceWrapper<ForecastWeatherResponse>> GetForecastWeatherAsync(GetForecastWeatherRequest forecastWeatherRequest)
+        /// <summary>
+        /// Throttling and gateway-level responses are transient, so they are reported as
+        /// "try again later" rather than as a permanent upstream error.
+        /// </summary>
+        private static ServiceErrorKind MapStatusCodeErrorKind(HttpStatusCode statusCode) => statusCode switch
         {
-            var cacheKey = BuildForecastWeatherCacheKey(forecastWeatherRequest);
+            HttpStatusCode.TooManyRequests
+                or HttpStatusCode.RequestTimeout
+                or HttpStatusCode.BadGateway
+                or HttpStatusCode.ServiceUnavailable
+                or HttpStatusCode.GatewayTimeout => ServiceErrorKind.UpstreamUnavailable,
+            _ => ServiceErrorKind.UpstreamError
+        };
 
-            if (_memoryCache.TryGetValue(cacheKey, out ServiceWrapper<ForecastWeatherResponse>? cachedResponse) && cachedResponse != null)
-            {
-                _logger.LogInformation("Returning cached forecast weather data for location: {Location}", forecastWeatherRequest.Location);
-                return cachedResponse;
-            }
+        /// <summary>
+        /// Weatherstack uses the 6xx range for problems with the submitted query and
+        /// the 1xx range for account-level problems (invalid key, exhausted quota).
+        /// </summary>
+        private static ServiceErrorKind MapProviderErrorKind(int? errorCode) => errorCode switch
+        {
+            >= 600 and < 700 => ServiceErrorKind.InvalidRequest,
+            _ => ServiceErrorKind.UpstreamError
+        };
 
-            try
-            {
-                using var httpClient = _httpClientFactory.CreateClient("WeatherServiceClient");
-                var queryString = _requestBuilder.BuildQueryForForecastWeather(forecastWeatherRequest);
-                var requestUrl = $"{WeatherApiBaseUrl}/{ForecastWeatherEndpoint}?access_key={WeatherApiKey}&query={queryString}";
+        private static string BuildProviderErrorMessage(WeatherstackError? error) => error is null
+            ? "The weather provider rejected the request."
+            : $"Weatherstack error {error.code} ({error.type}): {error.info}";
 
-                _logger.LogInformation("Requested forecast weather data for location: {Location}", forecastWeatherRequest.Location);
-                var response = await httpClient.GetAsync(requestUrl);
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var weatherResponse = System.Text.Json.JsonSerializer.Deserialize<ForecastWeatherResponse>(content);
-                    _logger.LogInformation("Successfully fetched forecast weather data for location: {Location}", forecastWeatherRequest.Location);
-                    var result = new ServiceWrapper<ForecastWeatherResponse>
-                    {
-                        IsSuccess = true,
-                        Data = weatherResponse,
-                        DetailedErrorMessage = null
-                    };
-
-                    if (weatherResponse != null)
-                    {
-                        _memoryCache.Set(cacheKey, result, CacheDuration);
-                        _logger.LogInformation("Cached forecast weather data for location: {Location} for {CacheDuration} minutes", forecastWeatherRequest.Location, CacheDuration.TotalMinutes);
-                    }
-
-                    return result;
-                }
-                else
-                {
-                    var errorMessage = $"Weatherstack API returned status code {response.StatusCode}";
-                    return new ServiceWrapper<ForecastWeatherResponse>
-                    {
-                        IsSuccess = false,
-                        Data = null,
-                        DetailedErrorMessage = errorMessage
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while fetching forecast weather data");
-                return new ServiceWrapper<ForecastWeatherResponse>
-                {
-                    IsSuccess = false,
-                    Data = null,
-                    DetailedErrorMessage = "An error occurred while fetching forecast weather data."
-                };
-            }
-        }
+        private static ServiceWrapper<T> Failure<T>(ServiceErrorKind errorKind, string message) where T : class => new()
+        {
+            IsSuccess = false,
+            Data = null,
+            DetailedErrorMessage = message,
+            ErrorKind = errorKind
+        };
         #endregion
     }
 }
